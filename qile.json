@@ -30,6 +30,13 @@
   "homePage": "https://www.252035.xyz/xs/tvbox/nostr.html"
     },
     {
+"key": "歪比",
+"name": "歪比/鱼壳可用",
+"type": 3,
+"api": "csp_Nostr",
+"homePage": "http://tvm.serv00.net/wb.html"
+},
+    {
       "key": "速播采集",
       "name": "速播",
       "type": 1,
