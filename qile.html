@@ -203,9 +203,9 @@
 <!-- 登录遮罩 -->
     <div id="loginOverlay">
         <div class="login-box">
-            <h2>🔐 身份验证</h2>
+            <h2>GitHub辅助工具<br>🔐 身份验证</h2>
             <p style="color:var(--dim);margin-bottom:1rem;">
-                <a href="token.html" style="color:inherit; text-decoration:none; cursor:pointer;">请输入密码以访问文件浏览器</a>
+                <a href="token.html" style="color:inherit; text-decoration:none; cursor:pointer;">请输入密码以访问</a>
             </p>
             <input type="password" id="passwordInput" placeholder="请输入密码" autofocus>
             <button id="loginBtn">登 录</button>
@@ -216,7 +216,7 @@
     <!-- 主应用 -->
     <div id="app" style="display: none;">
         <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-            <h1 style="margin-bottom:0;">📁 GitHub 文件浏览器</h1>
+            <h1 style="margin-bottom:0;">GitHub辅助工具</h1>
             <div class="header-right">
                 <button class="theme-btn" id="themeBtn">🌓 暗色模式</button>
                 <button class="logout-btn" id="logoutBtn">🚪 退出登录</button>
@@ -315,9 +315,11 @@
 
     <script>
         (function() {
-            // ==================== 安全配置 ====================
+            // ====== 安全配置 ====在Token.html页面内生产以下值=
 const PASSWORD_HASH = "9d19d9c19e96248ddc82b0bf356e6fec64109b4c8ab3b0cbcdf2c5535c708f04";
-            const ENCRYPTED_TOKEN = {"iv":"437f3f57c7ac4cd1d1b44005307e185a76d461068b2c5b5d24a8d686","data":"50b458d44d6a87581d918cb5683ae8eb36305b441c4aa3f50739b41fd69d53"};
+//输入网站登录密码生成的SHA‑256哈希值
+const ENCRYPTED_TOKEN = {"iv":"437f3f57c7ac4cd1d1b44005307e185a76d461068b2c5b5d24a8d686","data":"50b458d44d6a87581d918cb5683ae8eb36305b441c4aa3f50739b41fd69d53"};
+//输入网站登录密码和GitHubToken生成的加密对象。
 
             // ==================== 登录 & 解密引擎 ====================
             const loginOverlay = document.getElementById('loginOverlay');
@@ -399,6 +401,7 @@ const PASSWORD_HASH = "9d19d9c19e96248ddc82b0bf356e6fec64109b4c8ab3b0cbcdf2c5535
             // ==================== 主应用 ====================
             function initApp() {
                 const OWN_USERNAME = 'jllyzjs';
+                //输入自己的GitHub用户名
                 const API_BASE = 'https://api.github.com';
                 const FETCH_TIMEOUT = 8000;
 
