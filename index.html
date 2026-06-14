@@ -14,6 +14,8 @@
             --hover: #f3f4f6;
             --dim: #656d76;
             --shadow: 0 1px 3px rgba(0,0,0,0.08);
+            --danger: #d1242f;
+            --success: #1a7f37;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -25,12 +27,56 @@
             max-width: 1000px;
             margin: 0 auto;
         }
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
+        #loginOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(246,248,250,0.98);
+            z-index: 9999;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+        }
+        .login-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+        }
+        .login-box h2 { margin-bottom: 1.5rem; color: #1f2328; }
+        .login-box input[type="password"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .login-box button:hover { background: #0860ca; }
+        .login-error { color: var(--danger); font-size: 0.9rem; margin-top: 0.5rem; min-height: 1.2rem; }
+
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .logout-btn {
+            margin-left: auto;
+            padding: 0.3rem 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--card);
+            cursor: pointer;
+            font-size: 0.9rem;
         }
         .token-bar, .proxy-bar {
             display: flex;
@@ -43,26 +89,15 @@
             border: 1px solid var(--border);
             border-radius: 6px;
         }
-        .proxy-bar label {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-        .proxy-bar input[type="radio"] {
-            margin: 0;
-        }
+        .proxy-bar label { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.9rem; cursor: pointer; }
+        .proxy-bar input[type="radio"] { margin: 0; }
         .token-bar input, .proxy-bar input[type="text"] {
             padding: 0.3rem 0.6rem;
             border: 1px solid var(--border);
             border-radius: 4px;
             font-size: 0.9rem;
         }
-        .proxy-bar input[type="text"] {
-            flex: 1;
-            min-width: 180px;
-        }
+        .proxy-bar input[type="text"] { flex: 1; min-width: 180px; }
         .btn {
             padding: 0.4rem 1rem;
             border: 1px solid var(--border);
@@ -74,149 +109,74 @@
             transition: background 0.1s;
         }
         .btn:hover { background: var(--hover); }
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
+        .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
         .btn-primary:hover { background: #0860ca; }
-        .repo-selector {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
+        .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
+        .repo-selector { display: flex; gap: 0.5rem; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
         .repo-selector select {
-            padding: 0.4rem 0.8rem;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background: var(--card);
-            font-size: 0.95rem;
-            flex: 1;
-            min-width: 200px;
+            padding: 0.4rem 0.8rem; border: 1px solid var(--border); border-radius: 6px;
+            background: var(--card); font-size: 0.95rem; flex: 1; min-width: 200px;
         }
         .breadcrumb {
-            font-size: 0.9rem;
-            margin-bottom: 0.6rem;
-            padding: 0.5rem;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            word-break: break-all;
+            font-size: 0.9rem; margin-bottom: 0.6rem; padding: 0.5rem;
+            background: var(--card); border: 1px solid var(--border); border-radius: 6px; word-break: break-all;
         }
-        .breadcrumb a {
-            color: var(--primary);
-            text-decoration: none;
-            cursor: pointer;
-        }
+        .breadcrumb a { color: var(--primary); text-decoration: none; cursor: pointer; }
         .breadcrumb a:hover { text-decoration: underline; }
+
+        /* 上传区域 */
+        .upload-section {
+            background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+            padding: 1rem; margin-bottom: 1rem;
+        }
+        .upload-section h3 { margin-bottom: 0.5rem; font-size: 1rem; }
+        .upload-controls {
+            display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
+        }
+        .upload-controls input[type="file"] { flex: 1; min-width: 200px; }
+        .upload-status { margin-top: 0.5rem; font-size: 0.9rem; }
+        .upload-status.success { color: var(--success); }
+        .upload-status.error { color: var(--danger); }
+
         .file-list {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
+            background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+            overflow: hidden; box-shadow: var(--shadow);
         }
         .file-item {
-            display: flex;
-            align-items: center;
-            padding: 0.6rem 1rem;
-            border-bottom: 1px solid var(--border);
-            transition: background 0.1s;
-            cursor: pointer;
+            display: flex; align-items: center; padding: 0.6rem 1rem;
+            border-bottom: 1px solid var(--border); transition: background 0.1s; cursor: pointer;
         }
         .file-item:last-child { border-bottom: none; }
         .file-item:hover { background: var(--hover); }
-        .file-icon {
-            width: 20px;
-            text-align: center;
-            margin-right: 0.75rem;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-        .file-name {
-            flex: 1;
-            word-break: break-word;
-            color: var(--primary);
-            font-weight: 500;
-        }
-        .file-size {
-            margin-left: 1rem;
-            color: var(--dim);
-            font-size: 0.85rem;
-            flex-shrink: 0;
-        }
-        .actions {
-            margin-left: 1rem;
-            display: flex;
-            gap: 0.5rem;
-            flex-shrink: 0;
-        }
+        .file-icon { width: 20px; text-align: center; margin-right: 0.75rem; font-size: 1.1rem; flex-shrink: 0; }
+        .file-name { flex: 1; word-break: break-word; color: var(--primary); font-weight: 500; }
+        .file-size { margin-left: 1rem; color: var(--dim); font-size: 0.85rem; flex-shrink: 0; }
+        .actions { margin-left: 1rem; display: flex; gap: 0.5rem; flex-shrink: 0; }
         .actions .btn { padding: 0.2rem 0.6rem; font-size: 0.8rem; }
-        .loading, .empty, .error {
-            padding: 2rem;
-            text-align: center;
-            color: var(--dim);
-        }
-        /* 预览模态框 */
+        .loading, .empty, .error { padding: 2rem; text-align: center; color: var(--dim); }
+
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;
         }
         .modal-overlay.active { display: flex; }
         .modal {
-            background: var(--card);
-            border-radius: 8px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            background: var(--card); border-radius: 8px; width: 90%; max-width: 800px;
+            max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
         .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.8rem 1.2rem;
-            border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.8rem 1.2rem; border-bottom: 1px solid var(--border);
         }
-        .modal-title {
-            font-weight: 600;
-            word-break: break-all;
-        }
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--dim);
-        }
-        .modal-body {
-            padding: 1rem;
-            overflow: auto;
-            flex: 1;
-        }
+        .modal-title { font-weight: 600; word-break: break-all; }
+        .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--dim); }
+        .modal-body { padding: 1rem; overflow: auto; flex: 1; }
         .modal-body pre {
-            background: #f6f8fa;
-            padding: 1rem;
-            border-radius: 4px;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            font-size: 0.9rem;
-            font-family: monospace;
+            background: #f6f8fa; padding: 1rem; border-radius: 4px;
+            overflow-x: auto; white-space: pre-wrap; font-size: 0.9rem; font-family: monospace;
         }
-        .note {
-            font-size: 0.85rem;
-            color: var(--dim);
-            margin-top: 0.3rem;
-        }
+        .note { font-size: 0.85rem; color: var(--dim); margin-top: 0.3rem; }
+
         @media (max-width: 600px) {
             body { padding: 10px; }
             .file-item { flex-wrap: wrap; padding: 0.8rem; }
@@ -225,48 +185,67 @@
     </style>
 </head>
 <body>
-    <h1>📁 GitHub 文件浏览器</h1>
-    <p class="note">浏览 jllyzjs 所有公开仓库的文件，支持预览和下载。国内用户可选择代理加速。</p>
 
-    <!-- 代理选择模块 -->
-    <div class="proxy-bar" id="proxyBar">
-        <span style="font-weight:600;">🔁 访问代理：</span>
-        <label>
-            <input type="radio" name="proxy" value="none" checked> 直连
-        </label>
-        <label>
-            <input type="radio" name="proxy" value="ghproxy"> gh-proxy.com
-        </label>
-        <label>
-            <input type="radio" name="proxy" value="jasonzeng"> gh.jasonzeng.dev
-        </label>
-        <label>
-            <input type="radio" name="proxy" value="custom"> 自定义
-        </label>
-        <input type="text" id="customProxyInput" placeholder="https://your-proxy.com/" disabled>
-        <span id="proxyStatus" class="note"></span>
+    <!-- 登录遮罩 -->
+    <div id="loginOverlay">
+        <div class="login-box">
+            <h2>🔐 身份验证</h2>
+            <p style="color:#656d76;margin-bottom:1rem;">请输入密码以访问文件浏览器</p>
+            <input type="password" id="passwordInput" placeholder="请输入密码" autofocus>
+            <button id="loginBtn">登 录</button>
+            <div class="login-error" id="loginError"></div>
+        </div>
     </div>
 
-    <!-- Token 区域 -->
-    <div class="token-bar">
-        <input type="password" id="tokenInput" placeholder="可选：输入 GitHub Token 提升速率限制" />
-        <button class="btn" id="saveTokenBtn">💾 保存 Token</button>
-        <button class="btn" id="clearTokenBtn">🗑️ 清除</button>
-        <span id="tokenStatus" class="note"></span>
-    </div>
+    <!-- 主应用容器 -->
+    <div id="app" style="display: none;">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <h1 style="margin-bottom:0;">📁 GitHub 文件浏览器</h1>
+            <button class="logout-btn" id="logoutBtn">🚪 退出登录</button>
+        </div>
+        <p class="note">浏览 jllyzjs 所有公开仓库，支持预览、下载和上传。国内用户请选择代理。</p>
 
-    <div class="repo-selector">
-        <label for="repoSelect">选择仓库：</label>
-        <select id="repoSelect">
-            <option value="">-- 加载中... --</option>
-        </select>
-        <button class="btn btn-primary" id="goBtn">📂 浏览根目录</button>
-    </div>
+        <!-- 代理选择 -->
+        <div class="proxy-bar" id="proxyBar">
+            <span style="font-weight:600;">🔁 访问代理：</span>
+            <label><input type="radio" name="proxy" value="none" checked> 直连</label>
+            <label><input type="radio" name="proxy" value="ghproxy"> gh-proxy.com</label>
+            <label><input type="radio" name="proxy" value="jasonzeng"> gh.jasonzeng.dev</label>
+            <label><input type="radio" name="proxy" value="custom"> 自定义</label>
+            <input type="text" id="customProxyInput" placeholder="https://your-proxy.com/" disabled>
+            <span id="proxyStatus" class="note"></span>
+        </div>
 
-    <div class="breadcrumb" id="breadcrumb"></div>
+        <!-- Token -->
+        <div class="token-bar">
+            <input type="password" id="tokenInput" placeholder="上传文件需填写有 repo 权限的 Token" />
+            <button class="btn" id="saveTokenBtn">💾 保存 Token</button>
+            <button class="btn" id="clearTokenBtn">🗑️ 清除</button>
+            <span id="tokenStatus" class="note"></span>
+        </div>
 
-    <div id="content">
-        <div class="empty">请选择一个仓库开始浏览</div>
+        <div class="repo-selector">
+            <label for="repoSelect">选择仓库：</label>
+            <select id="repoSelect"><option value="">-- 加载中... --</option></select>
+            <button class="btn btn-primary" id="goBtn">📂 浏览根目录</button>
+        </div>
+
+        <div class="breadcrumb" id="breadcrumb"></div>
+
+        <!-- 上传区域（动态显示） -->
+        <div class="upload-section" id="uploadSection" style="display:none;">
+            <h3>📤 上传文件到当前目录</h3>
+            <p class="note">最大上传大小：100 MB（GitHub 限制）</p>
+            <div class="upload-controls">
+                <input type="file" id="uploadFileInput">
+                <button class="btn btn-primary" id="uploadBtn">开始上传</button>
+            </div>
+            <div class="upload-status" id="uploadStatus"></div>
+        </div>
+
+        <div id="content">
+            <div class="empty">请选择一个仓库开始浏览</div>
+        </div>
     </div>
 
     <!-- 预览模态框 -->
@@ -282,381 +261,549 @@
 
     <script>
         (function() {
-            const USERNAME = 'jllyzjs';
-            const API_BASE = 'https://api.github.com';
+            // ==================== 密码设置 ====================
+            // 当前密码 "admin123" 的 SHA-256 哈希，请修改为你自己的密码哈希
+            const PASSWORD_HASH = "9d19d9c19e96248ddc82b0bf356e6fec64109b4c8ab3b0cbcdf2c5535c708f04";
+            
+            // ==================== 登录逻辑 ====================
+            const loginOverlay = document.getElementById('loginOverlay');
+            const appDiv = document.getElementById('app');
+            const passwordInput = document.getElementById('passwordInput');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginError = document.getElementById('loginError');
+            const logoutBtn = document.getElementById('logoutBtn');
 
-            // ---- 状态变量 ----
-            let token = localStorage.getItem('gh_token') || '';
-            let proxyMode = localStorage.getItem('gh_proxy_mode') || 'none'; // none / ghproxy / jasonzeng / custom
-            let customProxyUrl = localStorage.getItem('gh_custom_proxy') || '';
-
-            // 代理映射
-            const PROXY_MAP = {
-                ghproxy: 'https://gh-proxy.com/',
-                jasonzeng: 'https://gh.jasonzeng.dev/'
-            };
-
-            // ---- DOM 元素 ----
-            const tokenInput = document.getElementById('tokenInput');
-            const saveTokenBtn = document.getElementById('saveTokenBtn');
-            const clearTokenBtn = document.getElementById('clearTokenBtn');
-            const tokenStatus = document.getElementById('tokenStatus');
-            const repoSelect = document.getElementById('repoSelect');
-            const goBtn = document.getElementById('goBtn');
-            const breadcrumb = document.getElementById('breadcrumb');
-            const contentDiv = document.getElementById('content');
-            const previewModal = document.getElementById('previewModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalBody = document.getElementById('modalBody');
-            const modalClose = document.getElementById('modalClose');
-            const proxyRadios = document.querySelectorAll('input[name="proxy"]');
-            const customProxyInput = document.getElementById('customProxyInput');
-            const proxyStatus = document.getElementById('proxyStatus');
-
-            let currentState = { repo: null, path: '', ref: '' };
-
-            // ---- 初始化 UI 状态 ----
-            function initProxyUI() {
-                // 设置 radio
-                const activeRadio = document.querySelector(`input[name="proxy"][value="${proxyMode}"]`);
-                if (activeRadio) activeRadio.checked = true;
-                customProxyInput.value = customProxyUrl;
-                customProxyInput.disabled = (proxyMode !== 'custom');
-                updateProxyStatus();
+            function isAuthenticated() {
+                return sessionStorage.getItem('gh_browser_auth') === 'true';
             }
 
-            function updateProxyStatus() {
-                if (proxyMode === 'none') {
-                    proxyStatus.textContent = '⚠️ 直连可能受网络限制';
-                } else if (proxyMode === 'custom') {
-                    proxyStatus.textContent = customProxyUrl ? `✅ 自定义代理：${customProxyUrl}` : '❌ 请填写自定义代理地址';
-                } else {
-                    proxyStatus.textContent = `✅ 当前代理：${PROXY_MAP[proxyMode] || ''}`;
+            function showApp() {
+                loginOverlay.style.display = 'none';
+                appDiv.style.display = 'block';
+            }
+
+            function showLogin() {
+                appDiv.style.display = 'none';
+                loginOverlay.style.display = 'flex';
+                passwordInput.value = '';
+                loginError.textContent = '';
+            }
+
+            async function sha256(message) {
+                const msgBuffer = new TextEncoder().encode(message);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            loginBtn.addEventListener('click', async () => {
+                const password = passwordInput.value;
+                if (!password) {
+                    loginError.textContent = '密码不能为空';
+                    return;
                 }
-            }
-
-            // ---- 代理 URL 生成 ----
-            function getProxiedUrl(originalUrl) {
-                if (proxyMode === 'none') return originalUrl;
-                let proxyBase = '';
-                if (proxyMode === 'custom') {
-                    if (!customProxyUrl) return originalUrl; // 无效时不代理
-                    proxyBase = customProxyUrl;
-                } else {
-                    proxyBase = PROXY_MAP[proxyMode] || '';
-                }
-                if (!proxyBase) return originalUrl;
-                // 确保代理基础 URL 以单斜杠结尾
-                if (!proxyBase.endsWith('/')) proxyBase += '/';
-                return proxyBase + originalUrl;
-            }
-
-            // ---- Token 相关 ----
-            if (token) {
-                tokenInput.value = token;
-                tokenStatus.textContent = '✅ 已使用 Token';
-            }
-
-            function getHeaders() {
-                const headers = { 'Accept': 'application/vnd.github.v3+json' };
-                if (token) {
-                    headers['Authorization'] = `token ${token}`;
-                }
-                return headers;
-            }
-
-            // ---- API 请求（统一使用代理） ----
-            async function apiFetch(url) {
-                const finalUrl = getProxiedUrl(url);
-                const res = await fetch(finalUrl, { headers: getHeaders() });
-                if (!res.ok) {
-                    if (res.status === 403 && res.headers.get('X-RateLimit-Remaining') === '0') {
-                        throw new Error('API 速率限制已达上限，请添加 GitHub Token 或更换代理。');
-                    }
-                    if (res.status === 404) throw new Error('资源未找到 (404)');
-                    throw new Error(`请求失败 (${res.status})，请检查代理是否可用。`);
-                }
-                return res.json();
-            }
-
-            // ---- 加载仓库列表 ----
-            async function loadRepos() {
-                repoSelect.innerHTML = '<option value="">加载中...</option>';
                 try {
-                    const repos = await apiFetch(`${API_BASE}/users/${USERNAME}/repos?per_page=100&sort=updated`);
-                    repoSelect.innerHTML = '<option value="">-- 请选择仓库 --</option>';
-                    repos.forEach(repo => {
-                        const option = document.createElement('option');
-                        option.value = repo.name;
-                        option.textContent = repo.name + (repo.description ? ` - ${repo.description.substring(0,40)}` : '');
-                        repoSelect.appendChild(option);
-                    });
-                    if (repos.length === 0) {
-                        repoSelect.innerHTML = '<option value="">没有找到公开仓库</option>';
+                    const hash = await sha256(password);
+                    if (hash === PASSWORD_HASH) {
+                        sessionStorage.setItem('gh_browser_auth', 'true');
+                        showApp();
+                        initApp();
+                    } else {
+                        loginError.textContent = '密码错误，请重试';
+                        passwordInput.value = '';
+                        passwordInput.focus();
                     }
                 } catch (err) {
-                    repoSelect.innerHTML = `<option value="">加载失败: ${err.message}</option>`;
-                    console.error(err);
+                    loginError.textContent = '加密处理失败，请刷新页面重试';
                 }
+            });
+
+            passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') loginBtn.click();
+            });
+
+            logoutBtn.addEventListener('click', () => {
+                sessionStorage.removeItem('gh_browser_auth');
+                showLogin();
+            });
+
+            if (isAuthenticated()) {
+                showApp();
+                initApp();
+            } else {
+                showLogin();
             }
 
-            // 获取默认分支
-            async function getDefaultBranch(repo) {
-                try {
-                    const repoInfo = await apiFetch(`${API_BASE}/repos/${USERNAME}/${repo}`);
-                    return repoInfo.default_branch;
-                } catch {
-                    return 'main';
+            // ==================== 主应用 ====================
+            function initApp() {
+                const USERNAME = 'jllyzjs';
+                const API_BASE = 'https://api.github.com';
+                const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
+
+                let token = localStorage.getItem('gh_token') || '';
+                let proxyMode = localStorage.getItem('gh_proxy_mode') || 'none';
+                let customProxyUrl = localStorage.getItem('gh_custom_proxy') || '';
+
+                const PROXY_MAP = {
+                    ghproxy: 'https://gh-proxy.com/',
+                    jasonzeng: 'https://gh.jasonzeng.dev/'
+                };
+
+                // DOM 元素
+                const tokenInput = document.getElementById('tokenInput');
+                const saveTokenBtn = document.getElementById('saveTokenBtn');
+                const clearTokenBtn = document.getElementById('clearTokenBtn');
+                const tokenStatus = document.getElementById('tokenStatus');
+                const repoSelect = document.getElementById('repoSelect');
+                const goBtn = document.getElementById('goBtn');
+                const breadcrumb = document.getElementById('breadcrumb');
+                const contentDiv = document.getElementById('content');
+                const uploadSection = document.getElementById('uploadSection');
+                const uploadFileInput = document.getElementById('uploadFileInput');
+                const uploadBtn = document.getElementById('uploadBtn');
+                const uploadStatus = document.getElementById('uploadStatus');
+                const previewModal = document.getElementById('previewModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalBody = document.getElementById('modalBody');
+                const modalClose = document.getElementById('modalClose');
+                const proxyRadios = document.querySelectorAll('input[name="proxy"]');
+                const customProxyInput = document.getElementById('customProxyInput');
+                const proxyStatus = document.getElementById('proxyStatus');
+
+                let currentState = { repo: null, path: '', ref: '' };
+
+                // ---- 代理 UI 初始化 ----
+                function initProxyUI() {
+                    const activeRadio = document.querySelector(`input[name="proxy"][value="${proxyMode}"]`);
+                    if (activeRadio) activeRadio.checked = true;
+                    customProxyInput.value = customProxyUrl;
+                    customProxyInput.disabled = (proxyMode !== 'custom');
+                    updateProxyStatus();
                 }
-            }
 
-            // ---- 渲染文件列表 ----
-            async function loadContents(repo, path = '') {
-                contentDiv.innerHTML = '<div class="loading">⏳ 加载文件列表中...</div>';
-                try {
-                    const branch = currentState.ref || await getDefaultBranch(repo);
-                    currentState.ref = branch;
-                    const url = `${API_BASE}/repos/${USERNAME}/${repo}/contents/${path}?ref=${branch}`;
-                    const data = await apiFetch(url);
-
-                    if (!Array.isArray(data)) {
-                        throw new Error('路径指向的是文件，不是文件夹。请返回上级。');
+                function updateProxyStatus() {
+                    if (proxyMode === 'none') {
+                        proxyStatus.textContent = '⚠️ 直连可能受网络限制';
+                    } else if (proxyMode === 'custom') {
+                        proxyStatus.textContent = customProxyUrl ? `✅ 自定义代理：${customProxyUrl}` : '❌ 请填写自定义代理地址';
+                    } else {
+                        proxyStatus.textContent = `✅ 当前代理：${PROXY_MAP[proxyMode] || ''}`;
                     }
+                }
 
-                    if (data.length === 0) {
-                        contentDiv.innerHTML = '<div class="empty">📭 此目录为空</div>';
-                        return;
+                function getProxiedUrl(originalUrl) {
+                    if (proxyMode === 'none') return originalUrl;
+                    let proxyBase = '';
+                    if (proxyMode === 'custom') {
+                        if (!customProxyUrl) return originalUrl;
+                        proxyBase = customProxyUrl;
+                    } else {
+                        proxyBase = PROXY_MAP[proxyMode] || '';
                     }
+                    if (!proxyBase) return originalUrl;
+                    if (!proxyBase.endsWith('/')) proxyBase += '/';
+                    return proxyBase + originalUrl;
+                }
 
-                    let html = '<div class="file-list">';
-                    data.forEach(item => {
-                        const isDir = item.type === 'dir';
-                        const icon = isDir ? '📁' : '📄';
-                        const size = item.size ? formatSize(item.size) : '';
-                        const downloadUrl = item.download_url || '';
-                        const name = item.name;
-                        const itemPath = item.path;
+                // ---- Token UI ----
+                if (token) {
+                    tokenInput.value = token;
+                    tokenStatus.textContent = '✅ 已使用 Token（上传需要 repo 权限）';
+                }
 
-                        // 下载链接使用代理
-                        const proxiedDownload = downloadUrl ? getProxiedUrl(downloadUrl) : '';
+                function getHeaders() {
+                    const headers = { 'Accept': 'application/vnd.github.v3+json' };
+                    if (token) {
+                        headers['Authorization'] = `token ${token}`;
+                    }
+                    return headers;
+                }
 
-                        html += `
-                            <div class="file-item" data-path="${escapeHtml(itemPath)}" data-type="${item.type}" data-download="${escapeHtml(proxiedDownload)}" data-original-download="${escapeHtml(downloadUrl)}">
-                                <span class="file-icon">${icon}</span>
-                                <span class="file-name">${escapeHtml(name)}</span>
-                                <span class="file-size">${size}</span>
-                                <span class="actions">
-                                    <button class="btn preview-btn" data-download="${escapeHtml(proxiedDownload)}" data-name="${escapeHtml(name)}">🔍 预览</button>
-                                    <a href="${escapeHtml(proxiedDownload)}" download class="btn" ${!proxiedDownload ? 'disabled' : ''}>⬇️ 下载</a>
-                                </span>
-                            </div>
-                        `;
-                    });
-                    html += '</div>';
-                    contentDiv.innerHTML = html;
+                // ---- 通用 API 请求（支持方法、JSON body） ----
+                async function apiRequest(url, options = {}) {
+                    const finalUrl = getProxiedUrl(url);
+                    const fetchOptions = {
+                        method: options.method || 'GET',
+                        headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+                    };
+                    if (options.body) {
+                        fetchOptions.body = JSON.stringify(options.body);
+                    }
+                    const res = await fetch(finalUrl, fetchOptions);
+                    if (!res.ok) {
+                        const errorBody = await res.json().catch(() => ({}));
+                        if (res.status === 403 && res.headers.get('X-RateLimit-Remaining') === '0') {
+                            throw new Error('API 速率限制已达上限，请添加 Token 或更换代理。');
+                        }
+                        if (res.status === 422 && errorBody.message?.includes('sha')) {
+                            throw new Error('文件已存在，需要提供原有文件的 SHA（上传冲突）');
+                        }
+                        throw new Error(errorBody.message || `请求失败 (${res.status})`);
+                    }
+                    return res.json();
+                }
 
-                    // 绑定点击事件
-                    document.querySelectorAll('.file-item').forEach(item => {
-                        item.addEventListener('click', function(e) {
-                            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) {
-                                return;
-                            }
-                            const type = this.dataset.type;
-                            const itemPath = this.dataset.path;
-                            if (type === 'dir') {
-                                navigateTo(repo, itemPath);
-                            } else {
-                                const downloadUrl = this.dataset.download; // 已经是代理后的URL
-                                const name = this.dataset.name || itemPath.split('/').pop();
-                                if (downloadUrl) {
-                                    previewFile(name, downloadUrl);
+                // 原 apiFetch 改为调用 apiRequest
+                async function apiFetch(url) {
+                    return apiRequest(url, { method: 'GET' });
+                }
+
+                // ---- 加载仓库列表 ----
+                async function loadRepos() {
+                    repoSelect.innerHTML = '<option value="">加载中...</option>';
+                    try {
+                        const repos = await apiFetch(`${API_BASE}/users/${USERNAME}/repos?per_page=100&sort=updated`);
+                        repoSelect.innerHTML = '<option value="">-- 请选择仓库 --</option>';
+                        repos.forEach(repo => {
+                            const option = document.createElement('option');
+                            option.value = repo.name;
+                            option.textContent = repo.name + (repo.description ? ` - ${repo.description.substring(0,40)}` : '');
+                            repoSelect.appendChild(option);
+                        });
+                        if (repos.length === 0) {
+                            repoSelect.innerHTML = '<option value="">没有找到公开仓库</option>';
+                        }
+                    } catch (err) {
+                        repoSelect.innerHTML = `<option value="">加载失败: ${err.message}</option>`;
+                        console.error(err);
+                    }
+                }
+
+                async function getDefaultBranch(repo) {
+                    try {
+                        const repoInfo = await apiFetch(`${API_BASE}/repos/${USERNAME}/${repo}`);
+                        return repoInfo.default_branch;
+                    } catch {
+                        return 'main';
+                    }
+                }
+
+                // ---- 渲染文件列表 ----
+                async function loadContents(repo, path = '') {
+                    contentDiv.innerHTML = '<div class="loading">⏳ 加载文件列表中...</div>';
+                    uploadSection.style.display = 'none'; // 默认隐藏上传区
+                    try {
+                        const branch = currentState.ref || await getDefaultBranch(repo);
+                        currentState.ref = branch;
+                        const url = `${API_BASE}/repos/${USERNAME}/${repo}/contents/${path}?ref=${branch}`;
+                        const data = await apiFetch(url);
+
+                        if (!Array.isArray(data)) {
+                            throw new Error('路径指向的是文件，不是文件夹。请返回上级。');
+                        }
+
+                        // 显示上传区域（只在目录内显示）
+                        uploadSection.style.display = 'block';
+
+                        if (data.length === 0) {
+                            contentDiv.innerHTML = '<div class="empty">📭 此目录为空</div>';
+                            return;
+                        }
+
+                        let html = '<div class="file-list">';
+                        data.forEach(item => {
+                            const isDir = item.type === 'dir';
+                            const icon = isDir ? '📁' : '📄';
+                            const size = item.size ? formatSize(item.size) : '';
+                            const downloadUrl = item.download_url || '';
+                            const name = item.name;
+                            const itemPath = item.path;
+                            const proxiedDownload = downloadUrl ? getProxiedUrl(downloadUrl) : '';
+
+                            html += `
+                                <div class="file-item" data-path="${escapeHtml(itemPath)}" data-type="${item.type}" data-download="${escapeHtml(proxiedDownload)}">
+                                    <span class="file-icon">${icon}</span>
+                                    <span class="file-name">${escapeHtml(name)}</span>
+                                    <span class="file-size">${size}</span>
+                                    <span class="actions">
+                                        <button class="btn preview-btn" data-download="${escapeHtml(proxiedDownload)}" data-name="${escapeHtml(name)}">🔍 预览</button>
+                                        <a href="${escapeHtml(proxiedDownload)}" download class="btn" ${!proxiedDownload ? 'disabled' : ''}>⬇️ 下载</a>
+                                    </span>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        contentDiv.innerHTML = html;
+
+                        // 绑定点击
+                        document.querySelectorAll('.file-item').forEach(item => {
+                            item.addEventListener('click', function(e) {
+                                if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) return;
+                                const type = this.dataset.type;
+                                const itemPath = this.dataset.path;
+                                if (type === 'dir') {
+                                    navigateTo(repo, itemPath);
+                                } else {
+                                    const dlUrl = this.dataset.download;
+                                    const fname = this.querySelector('.file-name').textContent;
+                                    if (dlUrl) {
+                                        previewFile(fname, dlUrl);
+                                    } else {
+                                        alert('无法预览此文件');
+                                    }
+                                }
+                            });
+                        });
+
+                        document.querySelectorAll('.preview-btn').forEach(btn => {
+                            btn.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                const dlUrl = this.dataset.download;
+                                const fname = this.dataset.name;
+                                if (dlUrl) {
+                                    previewFile(fname, dlUrl);
                                 } else {
                                     alert('无法预览此文件');
                                 }
-                            }
+                            });
                         });
-                    });
 
-                    document.querySelectorAll('.preview-btn').forEach(btn => {
-                        btn.addEventListener('click', function(e) {
-                            e.stopPropagation();
-                            const downloadUrl = this.dataset.download;
-                            const name = this.dataset.name;
-                            if (downloadUrl) {
-                                previewFile(name, downloadUrl);
+                    } catch (err) {
+                        contentDiv.innerHTML = `<div class="error">❌ 加载失败: ${escapeHtml(err.message)}</div>`;
+                    }
+                }
+
+                function navigateTo(repo, path) {
+                    currentState.repo = repo;
+                    currentState.path = path;
+                    updateBreadcrumb();
+                    loadContents(repo, path);
+                }
+
+                function updateBreadcrumb() {
+                    const repo = currentState.repo;
+                    const path = currentState.path || '';
+                    if (!repo) {
+                        breadcrumb.innerHTML = '';
+                        return;
+                    }
+                    let parts = path.split('/').filter(Boolean);
+                    let html = `<a class="repo-root" data-repo="${escapeHtml(repo)}">📂 ${escapeHtml(repo)}</a>`;
+                    if (parts.length > 0) {
+                        html += ' / ';
+                        let cumulative = '';
+                        parts.forEach((part, index) => {
+                            cumulative += (index > 0 ? '/' : '') + part;
+                            if (index === parts.length - 1) {
+                                html += `<span>${escapeHtml(part)}</span>`;
                             } else {
-                                alert('无法预览此文件');
+                                html += `<a class="breadcrumb-link" data-path="${escapeHtml(cumulative)}">${escapeHtml(part)}</a> / `;
                             }
                         });
+                    }
+                    breadcrumb.innerHTML = html;
+
+                    document.querySelectorAll('.repo-root').forEach(el => {
+                        el.addEventListener('click', () => navigateTo(repo, ''));
                     });
-
-                } catch (err) {
-                    contentDiv.innerHTML = `<div class="error">❌ 加载失败: ${escapeHtml(err.message)}</div>`;
+                    document.querySelectorAll('.breadcrumb-link').forEach(el => {
+                        el.addEventListener('click', function() {
+                            navigateTo(repo, this.dataset.path);
+                        });
+                    });
                 }
-            }
 
-            // 导航
-            function navigateTo(repo, path) {
-                currentState.repo = repo;
-                currentState.path = path;
-                updateBreadcrumb();
-                loadContents(repo, path);
-            }
+                // ---- 上传功能 ----
+                uploadBtn.addEventListener('click', async () => {
+                    const file = uploadFileInput.files[0];
+                    const repo = currentState.repo;
+                    const path = currentState.path;
 
-            function updateBreadcrumb() {
-                const repo = currentState.repo;
-                const path = currentState.path || '';
-                if (!repo) {
-                    breadcrumb.innerHTML = '';
-                    return;
+                    if (!repo) {
+                        alert('请先选择一个仓库并进入目录');
+                        return;
+                    }
+                    if (!file) {
+                        alert('请先选择要上传的文件');
+                        return;
+                    }
+                    if (!token) {
+                        alert('上传文件需要 GitHub Token，请在顶部输入有 repo 权限的 Token 并保存。');
+                        return;
+                    }
+                    if (file.size > MAX_FILE_SIZE) {
+                        alert('文件大小超过 GitHub 限制（100 MB），请压缩后上传。');
+                        return;
+                    }
+
+                    // 构建上传路径
+                    const filePath = path ? `${path}/${file.name}` : file.name;
+
+                    // 检查文件是否已存在（获取 SHA）
+                    let existingSha = null;
+                    try {
+                        const checkUrl = `${API_BASE}/repos/${USERNAME}/${repo}/contents/${filePath}?ref=${currentState.ref}`;
+                        const checkRes = await apiRequest(checkUrl, { method: 'GET' });
+                        existingSha = checkRes.sha;
+                    } catch (e) {
+                        // 不存在或出错，忽略
+                    }
+
+                    if (existingSha) {
+                        const confirmOverwrite = confirm(`文件 "${file.name}" 已存在，是否覆盖？`);
+                        if (!confirmOverwrite) return;
+                    }
+
+                    uploadStatus.textContent = '⏳ 正在上传...';
+                    uploadStatus.className = 'upload-status';
+
+                    try {
+                        // 读取文件并转为 Base64
+                        const base64Content = await readFileAsBase64(file);
+
+                        const payload = {
+                            message: `Upload ${file.name} via browser`,
+                            content: base64Content,
+                            branch: currentState.ref || undefined
+                        };
+                        if (existingSha) {
+                            payload.sha = existingSha;
+                        }
+
+                        const apiUrl = `${API_BASE}/repos/${USERNAME}/${repo}/contents/${filePath}`;
+                        await apiRequest(apiUrl, { method: 'PUT', body: payload });
+
+                        uploadStatus.textContent = `✅ 上传成功！文件路径：${filePath}`;
+                        uploadStatus.className = 'upload-status success';
+                        uploadFileInput.value = '';
+                        // 刷新当前目录
+                        loadContents(repo, path);
+                    } catch (err) {
+                        uploadStatus.textContent = `❌ 上传失败：${err.message}`;
+                        uploadStatus.className = 'upload-status error';
+                    }
+                });
+
+                function readFileAsBase64(file) {
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            // 移除 Data URL 前缀
+                            const base64 = reader.result.split(',')[1];
+                            resolve(base64);
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
                 }
-                let parts = path.split('/').filter(Boolean);
-                let html = `<a class="repo-root" data-repo="${escapeHtml(repo)}">📂 ${escapeHtml(repo)}</a>`;
-                if (parts.length > 0) {
-                    html += ' / ';
-                    let cumulative = '';
-                    parts.forEach((part, index) => {
-                        cumulative += (index > 0 ? '/' : '') + part;
-                        if (index === parts.length - 1) {
-                            html += `<span>${escapeHtml(part)}</span>`;
+
+                // ---- 预览文件 ----
+                async function previewFile(name, downloadUrl) {
+                    modalTitle.textContent = name;
+                    modalBody.innerHTML = '⏳ 加载预览中...';
+                    previewModal.classList.add('active');
+
+                    const ext = name.split('.').pop().toLowerCase();
+                    const textExts = ['txt','md','html','htm','css','js','json','xml','yaml','yml','toml','ini','cfg','log','csv','tsv','sh','bat','py','java','c','cpp','h','rb','php','go','rs','swift','kt','ts','jsx','tsx','vue','scss','less','svg','gitignore','env','editorconfig','dockerfile','makefile','license'];
+                    const isText = textExts.includes(ext) || !ext;
+
+                    if (!isText) {
+                        modalBody.innerHTML = `<p>📦 此文件类型不支持在线预览，请直接下载。</p><a href="${downloadUrl}" download class="btn btn-primary">⬇️ 下载文件</a>`;
+                        return;
+                    }
+
+                    try {
+                        const res = await fetch(downloadUrl, { headers: getHeaders() });
+                        if (!res.ok) throw new Error('获取内容失败');
+                        const text = await res.text();
+                        if (text.length > 500000) {
+                            modalBody.innerHTML = `<p>⚠️ 文件较大 (${(text.length/1024).toFixed(1)} KB)，仅显示前 50000 字符。</p><pre>${escapeHtml(text.substring(0, 50000))}</pre>`;
                         } else {
-                            html += `<a class="breadcrumb-link" data-path="${escapeHtml(cumulative)}">${escapeHtml(part)}</a> / `;
+                            modalBody.innerHTML = `<pre>${escapeHtml(text)}</pre>`;
+                        }
+                    } catch (err) {
+                        modalBody.innerHTML = `<p>❌ 预览失败: ${escapeHtml(err.message)}</p>`;
+                    }
+                }
+
+                function closeModal() {
+                    previewModal.classList.remove('active');
+                }
+
+                function escapeHtml(text) {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
+
+                function formatSize(bytes) {
+                    if (bytes < 1024) return bytes + ' B';
+                    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+                    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+                }
+
+                // ---- 事件绑定 ----
+                proxyRadios.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        proxyMode = this.value;
+                        localStorage.setItem('gh_proxy_mode', proxyMode);
+                        customProxyInput.disabled = (proxyMode !== 'custom');
+                        if (proxyMode === 'custom') {
+                            customProxyUrl = customProxyInput.value.trim();
+                            localStorage.setItem('gh_custom_proxy', customProxyUrl);
+                        }
+                        updateProxyStatus();
+                        if (currentState.repo) {
+                            loadContents(currentState.repo, currentState.path);
+                        } else {
+                            loadRepos();
                         }
                     });
-                }
-                breadcrumb.innerHTML = html;
-
-                document.querySelectorAll('.repo-root').forEach(el => {
-                    el.addEventListener('click', () => navigateTo(repo, ''));
                 });
-                document.querySelectorAll('.breadcrumb-link').forEach(el => {
-                    el.addEventListener('click', function() {
-                        navigateTo(repo, this.dataset.path);
-                    });
-                });
-            }
 
-            // ---- 预览文件（也走代理） ----
-            async function previewFile(name, downloadUrl) {
-                modalTitle.textContent = name;
-                modalBody.innerHTML = '⏳ 加载预览中...';
-                previewModal.classList.add('active');
-
-                const ext = name.split('.').pop().toLowerCase();
-                const textExtensions = ['txt','md','html','htm','css','js','json','xml','yaml','yml','toml','ini','cfg','log','csv','tsv','sh','bat','py','java','c','cpp','h','rb','php','go','rs','swift','kt','ts','jsx','tsx','vue','scss','less','svg','gitignore','env','editorconfig','dockerfile','makefile','license'];
-                const isText = textExtensions.includes(ext) || !ext;
-
-                if (!isText) {
-                    modalBody.innerHTML = `<p>📦 此文件类型 (${ext || '未知'}) 不支持在线预览，请直接下载。</p><a href="${downloadUrl}" download class="btn btn-primary">⬇️ 下载文件</a>`;
-                    return;
-                }
-
-                try {
-                    // 此处 downloadUrl 已经是代理后的 URL
-                    const res = await fetch(downloadUrl, { headers: getHeaders() });
-                    if (!res.ok) throw new Error('获取内容失败');
-                    const text = await res.text();
-                    if (text.length > 500000) {
-                        modalBody.innerHTML = `<p>⚠️ 文件较大 (${(text.length/1024).toFixed(1)} KB)，仅显示前 50000 字符。</p><pre>${escapeHtml(text.substring(0, 50000))}</pre>`;
-                    } else {
-                        modalBody.innerHTML = `<pre>${escapeHtml(text)}</pre>`;
-                    }
-                } catch (err) {
-                    modalBody.innerHTML = `<p>❌ 预览失败: ${escapeHtml(err.message)}</p>`;
-                }
-            }
-
-            function closeModal() {
-                previewModal.classList.remove('active');
-            }
-
-            // 工具函数
-            function escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            function formatSize(bytes) {
-                if (bytes < 1024) return bytes + ' B';
-                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-                return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-            }
-
-            // ---- 事件绑定 ----
-            // 代理切换
-            proxyRadios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    proxyMode = this.value;
-                    localStorage.setItem('gh_proxy_mode', proxyMode);
-                    customProxyInput.disabled = (proxyMode !== 'custom');
+                customProxyInput.addEventListener('input', function() {
                     if (proxyMode === 'custom') {
-                        customProxyUrl = customProxyInput.value.trim();
+                        customProxyUrl = this.value.trim();
                         localStorage.setItem('gh_custom_proxy', customProxyUrl);
+                        updateProxyStatus();
                     }
-                    updateProxyStatus();
-                    // 如果已有仓库，重新加载当前目录（因为代理变了）
+                });
+
+                saveTokenBtn.addEventListener('click', () => {
+                    token = tokenInput.value.trim();
+                    localStorage.setItem('gh_token', token);
+                    tokenStatus.textContent = token ? '✅ Token 已保存（上传需要 repo 权限）' : 'ℹ️ 未使用 Token';
                     if (currentState.repo) {
                         loadContents(currentState.repo, currentState.path);
                     } else {
                         loadRepos();
                     }
                 });
-            });
+                clearTokenBtn.addEventListener('click', () => {
+                    token = '';
+                    localStorage.removeItem('gh_token');
+                    tokenInput.value = '';
+                    tokenStatus.textContent = '🗑️ Token 已清除';
+                    if (currentState.repo) {
+                        loadContents(currentState.repo, currentState.path);
+                    } else {
+                        loadRepos();
+                    }
+                });
 
-            customProxyInput.addEventListener('input', function() {
-                if (proxyMode === 'custom') {
-                    customProxyUrl = this.value.trim();
-                    localStorage.setItem('gh_custom_proxy', customProxyUrl);
-                    updateProxyStatus();
-                }
-            });
+                goBtn.addEventListener('click', () => {
+                    const repo = repoSelect.value;
+                    if (!repo) {
+                        alert('请先选择一个仓库');
+                        return;
+                    }
+                    navigateTo(repo, '');
+                });
 
-            // Token 操作
-            saveTokenBtn.addEventListener('click', () => {
-                token = tokenInput.value.trim();
-                localStorage.setItem('gh_token', token);
-                tokenStatus.textContent = token ? '✅ Token 已保存' : 'ℹ️ 未使用 Token';
-                if (currentState.repo) {
-                    loadContents(currentState.repo, currentState.path);
-                } else {
-                    loadRepos();
-                }
-            });
-            clearTokenBtn.addEventListener('click', () => {
-                token = '';
-                localStorage.removeItem('gh_token');
-                tokenInput.value = '';
-                tokenStatus.textContent = '🗑️ Token 已清除';
-                if (currentState.repo) {
-                    loadContents(currentState.repo, currentState.path);
-                } else {
-                    loadRepos();
-                }
-            });
+                modalClose.addEventListener('click', closeModal);
+                previewModal.addEventListener('click', function(e) {
+                    if (e.target === previewModal) closeModal();
+                });
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && previewModal.classList.contains('active')) {
+                        closeModal();
+                    }
+                });
 
-            goBtn.addEventListener('click', () => {
-                const repo = repoSelect.value;
-                if (!repo) {
-                    alert('请先选择一个仓库');
-                    return;
-                }
-                navigateTo(repo, '');
-            });
-
-            modalClose.addEventListener('click', closeModal);
-            previewModal.addEventListener('click', function(e) {
-                if (e.target === previewModal) closeModal();
-            });
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && previewModal.classList.contains('active')) {
-                    closeModal();
-                }
-            });
-
-            // ---- 初始化 ----
-            initProxyUI();
-            loadRepos();
+                // 启动
+                initProxyUI();
+                loadRepos();
+            }
         })();
     </script>
 </body>
