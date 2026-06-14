@@ -200,13 +200,11 @@
 </head>
 <body>
 
-<!-- 登录遮罩 -->
+    <!-- 登录遮罩 -->
     <div id="loginOverlay">
         <div class="login-box">
             <h2>🔐 身份验证</h2>
-            <p style="color:var(--dim);margin-bottom:1rem;">
-                <a href="token.html" style="color:inherit; text-decoration:none; cursor:pointer;">请输入密码以访问文件浏览器</a>
-            </p>
+            <p style="color:var(--dim);margin-bottom:1rem;">请输入密码以访问文件浏览器</p>
             <input type="password" id="passwordInput" placeholder="请输入密码" autofocus>
             <button id="loginBtn">登 录</button>
             <div class="login-error" id="loginError"></div>
@@ -269,7 +267,14 @@
             <button class="btn btn-primary" id="externalGoBtn">📂 浏览</button>
         </div>
 
-        
+        <!-- Release 下载器 -->
+        <div class="release-downloader-bar">
+            <span style="font-weight:600;">📦 Release 下载器：</span>
+            <input type="text" id="releaseUrlInput" placeholder="输入 Release 链接，如 https://github.com/fish2018/webhtv/releases">
+            <button class="btn btn-primary" id="fetchReleaseBtn">📥 获取文件</button>
+        </div>
+        <div id="releaseDownloaderResult" style="margin-bottom: 1rem;"></div>
+
         <!-- 自己的仓库选择 -->
         <div class="repo-selector">
             <label for="repoSelect">选择自己的仓库：</label>
@@ -287,12 +292,14 @@
         <div id="content">
             <div class="empty">请选择一个仓库开始浏览</div>
         </div>
+
         <!-- 仓库最新 Release 区域 -->
         <div class="release-section" id="releaseSection" style="display:none;">
             <h3>最新 Release 资产</h3>
             <div id="releaseListContainer"></div>
         </div>
     </div>
+
     <!-- 查看模态框 -->
     <div class="modal-overlay" id="previewModal">
         <div class="modal">
@@ -307,7 +314,7 @@
     <script>
         (function() {
             // ==================== 安全配置 ====================
-            const PASSWORD_HASH = "9d19d9c19e96248ddc82b0bf356e6fec64109b4c8ab3b0cbcdf2c5535c708f04";
+const PASSWORD_HASH = "9d19d9c19e96248ddc82b0bf356e6fec64109b4c8ab3b0cbcdf2c5535c708f04";
             const ENCRYPTED_TOKEN = {"iv":"7a088a36055fc75ee29a4d78e2cab06805ebe31da63ad8cb01c73866","data":"dc15713b4b6eefa374b8fe8957f39c79f99556e1652ce0d04cbdf8b67b10af"};
 
             // ==================== 登录 & 解密引擎 ====================
