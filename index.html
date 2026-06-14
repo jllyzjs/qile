@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub 文件浏览器 - jllyzjs</title>
+    <style>
+        :root {
+            --bg: #f6f8fa;
+            --card: #ffffff;
+            --border: #d0d7de;
+            --text: #1f2328;
+            --primary: #0969da;
+            --hover: #f3f4f6;
+            --dim: #656d76;
+            --danger: #d1242f;
+            --success: #1a7f37;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(246,248,250,0.98);
+            z-index: 9999; display: flex; align-items: center; justify-content: center;
+        }
+        .login-box {
+            background: white; padding: 2rem; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 90%; max-width: 380px; text-align: center;
+        }
+        .login-box h2 { margin-bottom: 1.5rem; }
+        .login-box input[type="password"] {
+            width: 100%; padding: 0.75rem; border: 1px solid var(--border);
+            border-radius: 6px; font-size: 1rem; margin-bottom: 1rem;
+        }
+        .login-box button {
+            width: 100%; padding: 0.75rem; background: var(--primary); color: white;
+            border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: 500;
+        }
+        .login-box button:hover { background: #0860ca; }
+        .login-error { color: var(--danger); font-size: 0.9rem; margin-top: 0.5rem; min-height: 1.2rem; }
+
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .logout-btn { margin-left: auto; padding: 0.3rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; font-size: 0.9rem; }
+        .token-bar, .proxy-bar {
+            display: flex; gap: 0.5rem; margin-bottom: 0.8rem; align-items: center;
+            flex-wrap: wrap; background: var(--card); padding: 0.6rem 1rem;
+            border: 1px solid var(--border); border-radius: 6px;
+        }
+        .proxy-bar label { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.9rem; cursor: pointer; }
+        .proxy-bar input[type="radio"] { margin: 0; }
+        .token-bar select, .token-bar input[type="password"] {
+            padding: 0.3rem 0.6rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem;
+        }
+        .proxy-bar input[type="text"] { flex: 1; min-width: 180px; padding: 0.3rem 0.6rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; }
+        .btn {
+            padding: 0.4rem 1rem; border: 1px solid var(--border); border-radius: 6px;
+            background: var(--card); cursor: pointer; font-size: 0.9rem; white-space: nowrap;
+        }
+        .btn:hover { background: var(--hover); }
+        .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-primary:hover { background: #0860ca; }
+        .repo-selector { display: flex; gap: 0.5rem; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+        .repo-selector select {
+            padding: 0.4rem 0.8rem; border: 1px solid var(--border); border-radius: 6px;
+            background: var(--card); font-size: 0.95rem; flex: 1; min-width: 200px;
+        }
+        .breadcrumb {
+            font-size: 0.9rem; margin-bottom: 0.6rem; padding: 0.5rem;
+            background: var(--card); border: 1px solid var(--border); border-radius: 6px; word-break: break-all;
+        }
+        .breadcrumb a { color: var(--primary); text-decoration: none; cursor: pointer; }
+        .breadcrumb a:hover { text-decoration: underline; }
+
+        .upload-section {
+            background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+            padding: 1rem; margin-bottom: 1rem;
+        }
+        .upload-section h3 { margin-bottom: 0.5rem; font-size: 1rem; }
+        .upload-controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+        .upload-controls input[type="file"] { flex: 1; min-width: 200px; }
+        .upload-status { margin-top: 0.5rem; font-size: 0.9rem; }
+        .upload-status.success { color: var(--success); }
+        .upload-status.error { color: var(--danger); }
+
+        .file-list {
+            background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+            overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .file-item {
+            display: flex; align-items: center; padding: 0.6rem 1rem;
+            border-bottom: 1px solid var(--border); transition: background 0.1s; cursor: pointer;
+        }
+        .file-item:last-child { border-bottom: none; }
+        .file-item:hover { background: var(--hover); }
+        .file-icon { width: 20px; text-align: center; margin-right: 0.75rem; font-size: 1.1rem; flex-shrink: 0; }
+        .file-name { flex: 1; word-break: break-word; color: var(--primary); font-weight: 500; }
+        .file-size { margin-left: 1rem; color: var(--dim); font-size: 0.85rem; flex-shrink: 0; }
+        .actions { margin-left: 1rem; display: flex; gap: 0.5rem; flex-shrink: 0; }
+        .actions .btn { padding: 0.2rem 0.6rem; font-size: 0.8rem; }
+        .loading, .empty, .error { padding: 2rem; text-align: center; color: var(--dim); }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--card); border-radius: 8px; width: 90%; max-width: 800px;
+            max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.8rem 1.2rem; border-bottom: 1px solid var(--border);
+        }
+        .modal-title { font-weight: 600; word-break: break-all; }
+        .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--dim); }
+        .modal-body { padding: 1rem; overflow: auto; flex: 1; }
+        .modal-body pre {
+            background: #f6f8fa; padding: 1rem; border-radius: 4px;
+            overflow-x: auto; white-space: pre-wrap; font-size: 0.9rem; font-family: monospace;
+        }
+        .note { font-size: 0.85rem; color: var(--dim); margin-top: 0.3rem; }
+    </style>
+</head>
+<body>
+
+    <!-- 登录遮罩 -->
+    <div id="loginOverlay">
+        <div class="login-box">
+            <h2>🔐 身份验证</h2>
+            <!-- ★ 修改点：提示文字变成无样式链接，点击跳转到 token-encryptor.html ★ -->
+            <p style="color:#656d76;margin-bottom:1rem;">
+                <a href="githubtoken.html" style="color:inherit; text-decoration:none; cursor:pointer;">请输入密码以访问文件浏览器</a>
+            </p>
+            <input type="password" id="passwordInput" placeholder="请输入密码" autofocus>
+            <button id="loginBtn">登 录</button>
+            <div class="login-error" id="loginError"></div>
+        </div>
+    </div>
+
+    <!-- 主应用 -->
+    <div id="app" style="display: none;">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <h1 style="margin-bottom:0;">📁 GitHub 文件浏览器</h1>
+            <button class="logout-btn" id="logoutBtn">🚪 退出登录</button>
+        </div>
+        <p class="note">浏览 jllyzjs 所有公开仓库，支持预览、下载和上传。国内用户请选择代理。</p>
+
+        <!-- 代理选择 -->
+        <div class="proxy-bar" id="proxyBar">
+            <span style="font-weight:600;">🔁 访问代理：</span>
+            <label><input type="radio" name="proxy" value="none" checked> 直连</label>
+            <label><input type="radio" name="proxy" value="ghproxy"> gh-proxy.com</label>
+            <label><input type="radio" name="proxy" value="jasonzeng"> gh.jasonzeng.dev</label>
+            <label><input type="radio" name="proxy" value="custom"> 自定义</label>
+            <input type="text" id="customProxyInput" placeholder="https://your-proxy.com/" disabled>
+            <span id="proxyStatus" class="note"></span>
+        </div>
+
+        <!-- Token 下拉 + 手动输入 -->
+        <div class="token-bar">
+            <span style="font-weight:600;">🔑 令牌：</span>
+            <select id="tokenSelect">
+                <option value="none">❌ 不使用 Token（受限）</option>
+                <option value="encrypted">🔐 使用内置加密 Token（登录后自动解密）</option>
+                <option value="custom">✏️ 手动输入 Token</option>
+            </select>
+            <input type="password" id="tokenInput" placeholder="输入自定义 Token" style="display:none; width:200px;">
+            <button class="btn btn-primary" id="saveTokenBtn">💾 应用令牌</button>
+            <span id="tokenStatus" class="note"></span>
+        </div>
+
+        <div class="repo-selector">
+            <label for="repoSelect">选择仓库：</label>
+            <select id="repoSelect"><option value="">-- 加载中... --</option></select>
+            <button class="btn btn-primary" id="goBtn">📂 浏览根目录</button>
+        </div>
+
+        <div class="breadcrumb" id="breadcrumb"></div>
+
+        <div class="upload-section" id="uploadSection" style="display:none;">
+            <h3>📤 上传文件到当前目录</h3>
+            <p class="note">最大 100 MB，需要有效 Token（repo 权限）</p>
+            <div class="upload-controls">
+                <input type="file" id="uploadFileInput">
+                <button class="btn btn-primary" id="uploadBtn">开始上传</button>
+            </div>
+            <div class="upload-status" id="uploadStatus"></div>
+        </div>
+
+        <div id="content">
+            <div class="empty">请选择一个仓库开始浏览</div>
+        </div>
+    </div>
+
+    <!-- 预览模态框 -->
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title" id="modalTitle"></span>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">加载中...</div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ==================== 安全配置 ====================
+            const PASSWORD_HASH = "67081d938ac768ba31391874fb390d12a1ff5dcd8d2f90a4f77960067901b550"; // 请用生成器替换
+            const ENCRYPTED_TOKEN = {"iv":"718706663f816439a975109972e41fd763214d894af2ae96f20e4362","data":"c116a1f3ced0a21d247ff6c182b826c0d26edcc82a0b2e4a4014c8c9e12ccd"}; // 请用生成器生成的加密对象替换，如 { iv: "...", data: "..." }
+
+            // ==================== 登录 & 解密引擎 ====================
+            const loginOverlay = document.getElementById('loginOverlay');
+            const appDiv = document.getElementById('app');
+            const passwordInput = document.getElementById('passwordInput');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginError = document.getElementById('loginError');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            let decryptedToken = '';
+
+            function isAuthenticated() {
+                return sessionStorage.getItem('gh_browser_auth') === 'true';
+            }
+
+            function showApp() {
+                loginOverlay.style.display = 'none';
+                appDiv.style.display = 'block';
+            }
+
+            function showLogin() {
+                appDiv.style.display = 'none';
+                loginOverlay.style.display = 'flex';
+                passwordInput.value = '';
+                loginError.textContent = '';
+            }
+
+            async function sha256(message) {
+                const msgBuffer = new TextEncoder().encode(message);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            async function deriveKey(password, salt) {
+                const enc = new TextEncoder();
+                const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+                return crypto.subtle.deriveKey(
+                    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+                    keyMaterial,
+                    { name: 'AES-GCM', length: 256 },
+                    false,
+                    ['decrypt']
+                );
+            }
+
+            async function decryptToken(encryptedObj, password) {
+                try {
+                    const iv = hexToUint8Array(encryptedObj.iv);
+                    const data = hexToUint8Array(encryptedObj.data);
+                    const salt = iv.slice(0, 16);
+                    const actualIv = iv.slice(16);
+                    const key = await deriveKey(password, salt);
+                    const decrypted = await crypto.subtle.decrypt(
+                        { name: 'AES-GCM', iv: actualIv },
+                        key,
+                        data
+                    );
+                    return new TextDecoder().decode(decrypted);
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function hexToUint8Array(hex) {
+                return new Uint8Array(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+            }
+
+            loginBtn.addEventListener('click', async () => {
+                const pwd = passwordInput.value;
+                if (!pwd) {
+                    loginError.textContent = '密码不能为空';
+                    return;
+                }
+                try {
+                    const hash = await sha256(pwd);
+                    if (hash !== PASSWORD_HASH) {
+                        loginError.textContent = '密码错误，请重试';
+                        passwordInput.value = '';
+                        passwordInput.focus();
+                        return;
+                    }
+
+                    if (ENCRYPTED_TOKEN && ENCRYPTED_TOKEN.iv && ENCRYPTED_TOKEN.data) {
+                        const dec = await decryptToken(ENCRYPTED_TOKEN, pwd);
+                        decryptedToken = dec || '';
+                    } else {
+                        decryptedToken = '';
+                    }
+
+                    sessionStorage.setItem('gh_browser_auth', 'true');
+                    showApp();
+                    initApp();
+                } catch (err) {
+                    loginError.textContent = '验证过程出错，请刷新页面';
+                }
+            });
+
+            passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') loginBtn.click();
+            });
+
+            logoutBtn.addEventListener('click', () => {
+                sessionStorage.removeItem('gh_browser_auth');
+                showLogin();
+            });
+
+            if (isAuthenticated()) {
+                sessionStorage.removeItem('gh_browser_auth'); // 安全起见每次需重新输入密码解密 Token
+                showLogin();
+            } else {
+                showLogin();
+            }
+
+            // ==================== 主应用 ====================
+            function initApp() {
+                const USERNAME = 'jllyzjs';
+                const API_BASE = 'https://api.github.com';
+                const MAX_FILE_SIZE = 100 * 1024 * 1024;
+
+                let activeToken = decryptedToken;
+                let tokenSource = localStorage.getItem('gh_token_source') || 'encrypted';
+                if (tokenSource === 'encrypted' && !activeToken) tokenSource = 'none';
+
+                let proxyMode = localStorage.getItem('gh_proxy_mode') || 'none';
+                let customProxyUrl = localStorage.getItem('gh_custom_proxy') || '';
+
+                const PROXY_MAP = {
+                    ghproxy: 'https://gh-proxy.com/',
+                    jasonzeng: 'https://gh.jasonzeng.dev/'
+                };
+
+                // DOM
+                const tokenSelect = document.getElementById('tokenSelect');
+                const tokenInput = document.getElementById('tokenInput');
+                const saveTokenBtn = document.getElementById('saveTokenBtn');
+                const tokenStatus = document.getElementById('tokenStatus');
+                const repoSelect = document.getElementById('repoSelect');
+                const goBtn = document.getElementById('goBtn');
+                const breadcrumb = document.getElementById('breadcrumb');
+                const contentDiv = document.getElementById('content');
+                const uploadSection = document.getElementById('uploadSection');
+                const uploadFileInput = document.getElementById('uploadFileInput');
+                const uploadBtn = document.getElementById('uploadBtn');
+                const uploadStatus = document.getElementById('uploadStatus');
+                const previewModal = document.getElementById('previewModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalBody = document.getElementById('modalBody');
+                const modalClose = document.getElementById('modalClose');
+                const proxyRadios = document.querySelectorAll('input[name="proxy"]');
+                const customProxyInput = document.getElementById('customProxyInput');
+                const proxyStatus = document.getElementById('proxyStatus');
+
+                let currentState = { repo: null, path: '', ref: '' };
+
+                // 初始化 Token UI
+                function initTokenUI() {
+                    tokenSelect.value = tokenSource;
+                    if (tokenSource === 'custom') {
+                        tokenInput.style.display = 'inline-block';
+                        tokenInput.value = '';
+                    } else {
+                        tokenInput.style.display = 'none';
+                    }
+                    updateTokenStatus();
+                }
+
+                function updateTokenStatus() {
+                    if (activeToken) {
+                        tokenStatus.textContent = `✅ 令牌已就绪 (${tokenSource === 'encrypted' ? '自动解密' : '手动输入'})`;
+                    } else {
+                        tokenStatus.textContent = '⚠️ 未使用令牌，API 限制 60次/小时，无法上传';
+                    }
+                }
+
+                tokenSelect.addEventListener('change', () => {
+                    tokenSource = tokenSelect.value;
+                    if (tokenSource === 'custom') {
+                        tokenInput.style.display = 'inline-block';
+                    } else {
+                        tokenInput.style.display = 'none';
+                        if (tokenSource === 'encrypted') {
+                            activeToken = decryptedToken;
+                        } else {
+                            activeToken = '';
+                        }
+                        localStorage.setItem('gh_token_source', tokenSource);
+                        updateTokenStatus();
+                        if (currentState.repo) loadContents(currentState.repo, currentState.path);
+                    }
+                });
+
+                saveTokenBtn.addEventListener('click', () => {
+                    if (tokenSource === 'custom') {
+                        activeToken = tokenInput.value.trim();
+                    } else if (tokenSource === 'encrypted') {
+                        activeToken = decryptedToken;
+                    } else {
+                        activeToken = '';
+                    }
+                    localStorage.setItem('gh_token_source', tokenSource);
+                    updateTokenStatus();
+                    if (currentState.repo) loadContents(currentState.repo, currentState.path);
+                    else loadRepos();
+                });
+
+                // 代理初始化
+                function initProxyUI() {
+                    const radio = document.querySelector(`input[name="proxy"][value="${proxyMode}"]`);
+                    if (radio) radio.checked = true;
+                    customProxyInput.value = customProxyUrl;
+                    customProxyInput.disabled = (proxyMode !== 'custom');
+                    updateProxyStatus();
+                }
+
+                function updateProxyStatus() {
+                    if (proxyMode === 'none') proxyStatus.textContent = '⚠️ 直连可能受网络限制';
+                    else if (proxyMode === 'custom') proxyStatus.textContent = customProxyUrl ? `✅ ${customProxyUrl}` : '❌ 请填写自定义代理地址';
+                    else proxyStatus.textContent = `✅ ${PROXY_MAP[proxyMode] || ''}`;
+                }
+
+                function getProxiedUrl(url) {
+                    if (proxyMode === 'none') return url;
+                    let base = proxyMode === 'custom' ? customProxyUrl : PROXY_MAP[proxyMode];
+                    if (!base) return url;
+                    if (!base.endsWith('/')) base += '/';
+                    return base + url;
+                }
+
+                function getHeaders() {
+                    const headers = { 'Accept': 'application/vnd.github.v3+json' };
+                    if (activeToken) headers['Authorization'] = `token ${activeToken}`;
+                    return headers;
+                }
+
+                async function apiRequest(url, options = {}) {
+                    const finalUrl = getProxiedUrl(url);
+                    const fetchOpts = {
+                        method: options.method || 'GET',
+                        headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+                    };
+                    if (options.body) fetchOpts.body = JSON.stringify(options.body);
+                    const res = await fetch(finalUrl, fetchOpts);
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        if (res.status === 403 && res.headers.get('X-RateLimit-Remaining') === '0')
+                            throw new Error('速率限制，请使用 Token 或更换代理');
+                        throw new Error(err.message || `请求失败 (${res.status})`);
+                    }
+                    return res.json();
+                }
+
+                async function apiFetch(url) { return apiRequest(url); }
+
+                async function loadRepos() {
+                    repoSelect.innerHTML = '<option value="">加载中...</option>';
+                    try {
+                        const repos = await apiFetch(`${API_BASE}/users/${USERNAME}/repos?per_page=100&sort=updated`);
+                        repoSelect.innerHTML = '<option value="">-- 请选择仓库 --</option>';
+                        repos.forEach(repo => {
+                            const opt = document.createElement('option');
+                            opt.value = repo.name;
+                            opt.textContent = repo.name + (repo.description ? ` - ${repo.description.substring(0,40)}` : '');
+                            repoSelect.appendChild(opt);
+                        });
+                    } catch (err) {
+                        repoSelect.innerHTML = `<option value="">加载失败: ${err.message}</option>`;
+                    }
+                }
+
+                async function getDefaultBranch(repo) {
+                    try { return (await apiFetch(`${API_BASE}/repos/${USERNAME}/${repo}`)).default_branch; }
+                    catch { return 'main'; }
+                }
+
+                async function loadContents(repo, path = '') {
+                    contentDiv.innerHTML = '<div class="loading">⏳ 加载中...</div>';
+                    uploadSection.style.display = 'none';
+                    try {
+                        const branch = currentState.ref || await getDefaultBranch(repo);
+                        currentState.ref = branch;
+                        const data = await apiFetch(`${API_BASE}/repos/${USERNAME}/${repo}/contents/${path}?ref=${branch}`);
+                        if (!Array.isArray(data)) throw new Error('这是文件，不是文件夹');
+                        uploadSection.style.display = 'block';
+
+                        if (data.length === 0) {
+                            contentDiv.innerHTML = '<div class="empty">📭 目录为空</div>';
+                            return;
+                        }
+
+                        let html = '<div class="file-list">';
+                        data.forEach(item => {
+                            const isDir = item.type === 'dir';
+                            const dl = item.download_url ? getProxiedUrl(item.download_url) : '';
+                            html += `<div class="file-item" data-path="${escapeHtml(item.path)}" data-type="${item.type}" data-download="${escapeHtml(dl)}">
+                                <span class="file-icon">${isDir ? '📁' : '📄'}</span>
+                                <span class="file-name">${escapeHtml(item.name)}</span>
+                                <span class="file-size">${item.size ? formatSize(item.size) : ''}</span>
+                                <span class="actions">
+                                    <button class="btn preview-btn" data-download="${escapeHtml(dl)}" data-name="${escapeHtml(item.name)}">🔍 预览</button>
+                                    <a href="${escapeHtml(dl)}" download class="btn" ${!dl ? 'disabled' : ''}>⬇️ 下载</a>
+                                </span>
+                            </div>`;
+                        });
+                        html += '</div>';
+                        contentDiv.innerHTML = html;
+
+                        document.querySelectorAll('.file-item').forEach(el => {
+                            el.addEventListener('click', function(e) {
+                                if (e.target.closest('button,a')) return;
+                                if (this.dataset.type === 'dir') navigateTo(repo, this.dataset.path);
+                                else {
+                                    const name = this.querySelector('.file-name').textContent;
+                                    previewFile(name, this.dataset.download);
+                                }
+                            });
+                        });
+                        document.querySelectorAll('.preview-btn').forEach(btn => {
+                            btn.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                previewFile(this.dataset.name, this.dataset.download);
+                            });
+                        });
+                    } catch (err) {
+                        contentDiv.innerHTML = `<div class="error">❌ ${escapeHtml(err.message)}</div>`;
+                    }
+                }
+
+                function navigateTo(repo, path) {
+                    currentState.repo = repo;
+                    currentState.path = path;
+                    updateBreadcrumb();
+                    loadContents(repo, path);
+                }
+
+                function updateBreadcrumb() {
+                    const repo = currentState.repo;
+                    const path = currentState.path || '';
+                    if (!repo) { breadcrumb.innerHTML = ''; return; }
+                    let parts = path.split('/').filter(Boolean);
+                    let html = `<a class="repo-root" data-repo="${escapeHtml(repo)}">📂 ${escapeHtml(repo)}</a>`;
+                    if (parts.length) {
+                        html += ' / ';
+                        let cum = '';
+                        parts.forEach((p, i) => {
+                            cum += (i ? '/' : '') + p;
+                            html += i === parts.length-1 ? `<span>${escapeHtml(p)}</span>` : `<a class="breadcrumb-link" data-path="${escapeHtml(cum)}">${escapeHtml(p)}</a> / `;
+                        });
+                    }
+                    breadcrumb.innerHTML = html;
+                    document.querySelectorAll('.repo-root').forEach(el => el.addEventListener('click', () => navigateTo(repo, '')));
+                    document.querySelectorAll('.breadcrumb-link').forEach(el => el.addEventListener('click', function() {
+                        navigateTo(repo, this.dataset.path);
+                    }));
+                }
+
+                // 上传
+                uploadBtn.addEventListener('click', async () => {
+                    if (!activeToken) {
+                        alert('上传需要 Token！请在下拉框中选择内置加密令牌（需密码已输入）或手动输入。');
+                        return;
+                    }
+                    const file = uploadFileInput.files[0];
+                    const repo = currentState.repo;
+                    const path = currentState.path;
+                    if (!repo) { alert('请先进入一个目录'); return; }
+                    if (!file) { alert('请选择文件'); return; }
+                    if (file.size > MAX_FILE_SIZE) { alert('文件超过 100MB'); return; }
+
+                    const filePath = path ? `${path}/${file.name}` : file.name;
+                    let sha = null;
+                    try {
+                        const check = await apiRequest(`${API_BASE}/repos/${USERNAME}/${repo}/contents/${filePath}?ref=${currentState.ref}`);
+                        sha = check.sha;
+                    } catch (e) {}
+                    if (sha && !confirm(`"${file.name}" 已存在，覆盖吗？`)) return;
+
+                    uploadStatus.textContent = '⏳ 上传中...';
+                    uploadStatus.className = 'upload-status';
+                    try {
+                        const base64 = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result.split(',')[1]);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(file);
+                        });
+                        const payload = { message: `Upload ${file.name}`, content: base64, branch: currentState.ref };
+                        if (sha) payload.sha = sha;
+                        await apiRequest(`${API_BASE}/repos/${USERNAME}/${repo}/contents/${filePath}`, { method: 'PUT', body: payload });
+                        uploadStatus.textContent = `✅ 上传成功！${filePath}`;
+                        uploadStatus.className = 'upload-status success';
+                        uploadFileInput.value = '';
+                        loadContents(repo, path);
+                    } catch (err) {
+                        uploadStatus.textContent = `❌ 上传失败：${err.message}`;
+                        uploadStatus.className = 'upload-status error';
+                    }
+                });
+
+                // 预览
+                async function previewFile(name, url) {
+                    modalTitle.textContent = name;
+                    modalBody.innerHTML = '⏳ 加载中...';
+                    previewModal.classList.add('active');
+                    const ext = name.split('.').pop().toLowerCase();
+                    const textExts = ['txt','md','html','css','js','json','xml','csv','py','java','c','cpp','go','rs','ts','sh'];
+                    if (!textExts.includes(ext) && ext) {
+                        modalBody.innerHTML = `<p>📦 无法预览此类型</p><a href="${url}" download class="btn btn-primary">⬇️ 下载</a>`;
+                        return;
+                    }
+                    try {
+                        const res = await fetch(url, { headers: getHeaders() });
+                        const text = await res.text();
+                        modalBody.innerHTML = text.length > 500000
+                            ? `<p>⚠️ 文件较大，显示前 50000 字符</p><pre>${escapeHtml(text.slice(0,50000))}</pre>`
+                            : `<pre>${escapeHtml(text)}</pre>`;
+                    } catch (err) {
+                        modalBody.innerHTML = `<p>❌ 预览失败：${err.message}</p>`;
+                    }
+                }
+
+                function closeModal() { previewModal.classList.remove('active'); }
+
+                function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+                function formatSize(b) { return b < 1024 ? b+' B' : b < 1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(1)+' MB'; }
+
+                // 事件绑定
+                proxyRadios.forEach(r => r.addEventListener('change', function() {
+                    proxyMode = this.value;
+                    localStorage.setItem('gh_proxy_mode', proxyMode);
+                    customProxyInput.disabled = (proxyMode !== 'custom');
+                    updateProxyStatus();
+                    if (currentState.repo) loadContents(currentState.repo, currentState.path);
+                    else loadRepos();
+                }));
+                customProxyInput.addEventListener('input', function() {
+                    customProxyUrl = this.value.trim();
+                    localStorage.setItem('gh_custom_proxy', customProxyUrl);
+                    updateProxyStatus();
+                });
+
+                goBtn.addEventListener('click', () => {
+                    const r = repoSelect.value;
+                    if (!r) alert('请选择仓库');
+                    else navigateTo(r, '');
+                });
+
+                modalClose.addEventListener('click', closeModal);
+                previewModal.addEventListener('click', e => e.target === previewModal && closeModal());
+                document.addEventListener('keydown', e => e.key === 'Escape' && previewModal.classList.contains('active') && closeModal());
+
+                initProxyUI();
+                initTokenUI();
+                loadRepos();
+            }
+        })();
+    </script>
+</body>
+</html>

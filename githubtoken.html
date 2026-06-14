@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Token 加密/解密 + 密码哈希生成器</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 16px;
+            color: #1f2328;
+            background: #f6f8fa;
+        }
+        h2, h3 { margin-top: 2rem; }
+        label { display: block; margin: 1rem 0 0.3rem; font-weight: 500; }
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .input-wrapper input,
+        textarea {
+            flex: 1;
+            padding: 0.5rem;
+            font-size: 1rem;
+            box-sizing: border-box;
+            border: 1px solid #d0d7de;
+            border-radius: 4px;
+        }
+        /* 解密用的大输入框 */
+        #encryptedInput {
+            min-height: 100px;
+            resize: vertical;
+            font-family: monospace;
+        }
+        .toggle-btn {
+            background: none;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 0.4rem 0.6rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+            width: 40px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        button {
+            margin-top: 1rem;
+            padding: 0.7rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            background: #0969da;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        button:hover { background: #0860ca; }
+        pre {
+            background: #f5f5f5;
+            padding: 0.8rem;
+            border-radius: 4px;
+            word-break: break-all;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            margin: 0.5rem 0 0;
+        }
+        .result-area {
+            position: relative;
+            margin-top: 0.5rem;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            background: #0969da;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        .copy-btn.copied { background: #1a7f37; }
+        .note {
+            color: #d1242f;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        hr {
+            margin: 2rem 0 1rem;
+            border: 0;
+            border-top: 1px solid #ddd;
+        }
+        .error-msg { color: #d1242f; }
+        .success-msg { color: #1a7f37; }
+
+        /* 手机端适配 */
+        @media (max-width: 500px) {
+            body {
+                padding: 0 12px;
+            }
+            h2 { font-size: 1.4rem; }
+            button {
+                width: 100%;
+                padding: 0.8rem;
+            }
+            .input-wrapper {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .toggle-btn {
+                align-self: flex-end;
+                margin-top: -2.5rem;
+                position: relative;
+                z-index: 2;
+            }
+            .copy-btn {
+                position: static;
+                margin-top: 0.5rem;
+                width: 100%;
+            }
+            pre {
+                max-height: 150px;
+                overflow-y: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>🔐 Token 加密工具</h2>
+    <p>输入<strong>网站登录密码</strong>和<strong>GitHub Token</strong>，生成加密对象。</p>
+
+    <label for="password">🔑 网站登录密码：</label>
+    <div class="input-wrapper">
+        <input type="password" id="password" placeholder="例如 admin123">
+        <button class="toggle-btn" id="togglePassword">👁️</button>
+    </div>
+
+    <label for="token">🔖 GitHub Token：</label>
+    <div class="input-wrapper">
+        <input type="password" id="token" placeholder="例如 ghp_xxxxxx">
+        <button class="toggle-btn" id="toggleToken">👁️</button>
+    </div>
+
+    <button id="encryptBtn">🔒 加密 Token 并生成对象</button>
+
+    <h3>📦 加密对象（用于 ENCRYPTED_TOKEN）：</h3>
+    <div class="result-area">
+        <pre id="tokenOutput">等待生成...</pre>
+        <button class="copy-btn" id="copyTokenBtn" style="display: none;">📋 复制</button>
+    </div>
+
+    <hr>
+
+    <h2>🔓 Token 解密验证</h2>
+    <p>粘贴加密对象 JSON，输入密码，解密查看明文 Token。</p>
+
+    <label for="encryptedInput">📋 加密对象（粘贴 JSON）：</label>
+    <textarea id="encryptedInput" placeholder='{"iv":"...","data":"..."}' rows="4"></textarea>
+
+    <label for="decryptPassword">🔑 登录密码：</label>
+    <div class="input-wrapper">
+        <input type="password" id="decryptPassword" placeholder="加密时使用的密码">
+        <button class="toggle-btn" id="toggleDecryptPwd">👁️</button>
+    </div>
+
+    <button id="decryptBtn">🔓 解密 Token</button>
+
+    <h3>🔍 解密结果：</h3>
+    <div class="result-area">
+        <pre id="decryptOutput">等待解密...</pre>
+        <button class="copy-btn" id="copyDecryptBtn" style="display: none;">📋 复制 Token</button>
+    </div>
+
+    <hr>
+
+    <h2>🔑 登录密码哈希生成器</h2>
+    <p>输入<strong>网站登录密码</strong>，生成 SHA‑256 哈希值（用于主页面验证密码）。</p>
+
+    <label for="pwdHashInput">🔐 网站登录密码：</label>
+    <div class="input-wrapper">
+        <input type="password" id="pwdHashInput" placeholder="输入密码">
+        <button class="toggle-btn" id="togglePwdHash">👁️</button>
+    </div>
+    <button id="hashBtn">🧮 生成密码哈希</button>
+
+    <h3>🔒 密码哈希（用于 PASSWORD_HASH）：</h3>
+    <div class="result-area">
+        <pre id="hashOutput">等待生成...</pre>
+        <button class="copy-btn" id="copyHashBtn" style="display: none;">📋 复制</button>
+    </div>
+
+    <p class="note">⚠️ 请保管好密码。生成后复制到主 HTML 文件对应位置。</p>
+
+    <script>
+        // ===== 通用函数 =====
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function setupToggle(btnId, inputId) {
+            const btn = document.getElementById(btnId);
+            const input = document.getElementById(inputId);
+            btn.addEventListener('click', () => {
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                btn.textContent = isPassword ? '🙈' : '👁️';
+            });
+        }
+
+        function setupCopy(btnId, outputId) {
+            const btn = document.getElementById(btnId);
+            btn.addEventListener('click', async () => {
+                const text = document.getElementById(outputId).textContent;
+                if (!text) return;
+                try {
+                    await navigator.clipboard.writeText(text);
+                    btn.textContent = '✅ 已复制';
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.textContent = '📋 复制';
+                        btn.classList.remove('copied');
+                    }, 2000);
+                } catch (err) {
+                    alert('复制失败，请手动复制');
+                }
+            });
+        }
+
+        setupToggle('togglePassword', 'password');
+        setupToggle('toggleToken', 'token');
+        setupToggle('toggleDecryptPwd', 'decryptPassword');
+        setupToggle('togglePwdHash', 'pwdHashInput');
+
+        setupCopy('copyTokenBtn', 'tokenOutput');
+        setupCopy('copyHashBtn', 'hashOutput');
+        setupCopy('copyDecryptBtn', 'decryptOutput');
+
+        // ===== Token 加密 =====
+        async function encryptToken(password, plainToken) {
+            const enc = new TextEncoder();
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+
+            const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+            const key = await crypto.subtle.deriveKey(
+                { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+                keyMaterial,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt']
+            );
+            const encrypted = await crypto.subtle.encrypt(
+                { name: 'AES-GCM', iv },
+                key,
+                enc.encode(plainToken)
+            );
+
+            const combinedIv = new Uint8Array(salt.length + iv.length);
+            combinedIv.set(salt);
+            combinedIv.set(iv, salt.length);
+
+            const ivHex = Array.from(combinedIv).map(b => b.toString(16).padStart(2, '0')).join('');
+            const dataHex = Array.from(new Uint8Array(encrypted)).map(b => b.toString(16).padStart(2, '0')).join('');
+            return { iv: ivHex, data: dataHex };
+        }
+
+        document.getElementById('encryptBtn').addEventListener('click', async () => {
+            const password = document.getElementById('password').value.trim();
+            const token = document.getElementById('token').value.trim();
+            const output = document.getElementById('tokenOutput');
+            const copyBtn = document.getElementById('copyTokenBtn');
+            if (!password || !token) {
+                alert('请填写密码和 Token');
+                return;
+            }
+            try {
+                const encrypted = await encryptToken(password, token);
+                output.textContent = JSON.stringify(encrypted);
+                copyBtn.style.display = 'block';
+            } catch (e) {
+                output.textContent = '加密失败: ' + e.message;
+                copyBtn.style.display = 'none';
+            }
+        });
+
+        // ===== Token 解密 =====
+        function hexToUint8Array(hex) {
+            return new Uint8Array(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+        }
+
+        async function decryptToken(encryptedObj, password) {
+            const ivCombined = hexToUint8Array(encryptedObj.iv);
+            const data = hexToUint8Array(encryptedObj.data);
+            if (ivCombined.length < 28) throw new Error('IV 长度不正确，需要 28 字节（16字节salt + 12字节iv）');
+            const salt = ivCombined.slice(0, 16);
+            const iv = ivCombined.slice(16, 28);
+
+            const enc = new TextEncoder();
+            const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+            const key = await crypto.subtle.deriveKey(
+                { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+                keyMaterial,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['decrypt']
+            );
+            const decrypted = await crypto.subtle.decrypt(
+                { name: 'AES-GCM', iv },
+                key,
+                data
+            );
+            return new TextDecoder().decode(decrypted);
+        }
+
+        document.getElementById('decryptBtn').addEventListener('click', async () => {
+            const encryptedStr = document.getElementById('encryptedInput').value.trim();
+            const password = document.getElementById('decryptPassword').value.trim();
+            const output = document.getElementById('decryptOutput');
+            const copyBtn = document.getElementById('copyDecryptBtn');
+            if (!encryptedStr || !password) {
+                alert('请填写加密对象和密码');
+                return;
+            }
+            let encryptedObj;
+            try {
+                encryptedObj = JSON.parse(encryptedStr);
+            } catch {
+                output.innerHTML = '<span class="error-msg">JSON 格式错误</span>';
+                copyBtn.style.display = 'none';
+                return;
+            }
+            if (!encryptedObj.iv || !encryptedObj.data) {
+                output.innerHTML = '<span class="error-msg">加密对象缺少 iv 或 data 字段</span>';
+                copyBtn.style.display = 'none';
+                return;
+            }
+            try {
+                const token = await decryptToken(encryptedObj, password);
+                output.textContent = token;
+                output.className = 'success-msg';
+                copyBtn.style.display = 'block';
+            } catch (e) {
+                output.innerHTML = `<span class="error-msg">解密失败：${e.message}</span>`;
+                copyBtn.style.display = 'none';
+            }
+        });
+
+        // ===== 密码哈希 =====
+        document.getElementById('hashBtn').addEventListener('click', async () => {
+            const password = document.getElementById('pwdHashInput').value.trim();
+            const output = document.getElementById('hashOutput');
+            const copyBtn = document.getElementById('copyHashBtn');
+            if (!password) {
+                alert('请输入密码');
+                return;
+            }
+            try {
+                const hash = await sha256(password);
+                output.textContent = hash;
+                copyBtn.style.display = 'block';
+            } catch (e) {
+                output.textContent = '生成失败: ' + e.message;
+                copyBtn.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
