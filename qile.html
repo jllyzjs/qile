@@ -458,19 +458,33 @@ const PASSWORD_HASH = "9d19d9c19e96248ddc82b0bf356e6fec64109b4c8ab3b0cbcdf2c5535
 
                 let proxyStatusMap = new Map();
 
-                // 代理检测
+                // ========== 代理检测（修复版） ==========
+                // 使用一个稳定的、支持跨域的测试资源（raw.githubusercontent.com 上的一个公开小文件）
+                // 采用 no-cors 模式，只要请求没有网络错误且未超时，就认为代理可用
                 async function testSingleProxy(proxyName, proxyBaseUrl) {
-                    const testUrl = proxyBaseUrl + 'https://api.github.com/zen';
+                    // 测试 URL：一个极小的 GitHub 公开文件（README.md 约 2KB）
+                    const testRawUrl = 'https://raw.githubusercontent.com/octocat/Hello-World/master/README.md';
+                    const testUrl = proxyBaseUrl + testRawUrl;
                     const start = Date.now();
                     try {
                         const controller = new AbortController();
                         const timeoutId = setTimeout(() => controller.abort(), 5000);
-                        const res = await fetch(testUrl, { signal: controller.signal });
+                        // 使用 no-cors 模式，避免 CORS 阻塞，只检测网络连通性
+                        const res = await fetch(testUrl, { 
+                            method: 'GET',
+                            mode: 'no-cors',
+                            signal: controller.signal
+                        });
                         clearTimeout(timeoutId);
-                        if (res.ok) return { ok: true, time: Date.now() - start };
-                        else return { ok: false, time: -1 };
-                    } catch (e) { return { ok: false, time: -1 }; }
+                        // no-cors 模式下 response 状态不可见，但只要没抛出异常且未超时，说明请求已发出并得到响应（不一定成功）
+                        // 这里统一视为“代理可达”
+                        return { ok: true, time: Date.now() - start };
+                    } catch (e) {
+                        // 网络错误或超时
+                        return { ok: false, time: -1 };
+                    }
                 }
+
                 function updateProxySelectDisplay() {
                     for (let i = 0; i < proxySelect.options.length; i++) {
                         const opt = proxySelect.options[i];
@@ -501,7 +515,7 @@ const PASSWORD_HASH = "9d19d9c19e96248ddc82b0bf356e6fec64109b4c8ab3b0cbcdf2c5535
                 }
                 async function testCurrentProxy() {
                     const cur = proxySelect.value;
-                    if (cur === 'none') { proxyStatus.textContent = '直连模式，无法测试代理'; return; }
+                    if (cur === 'none') { proxyStatus.textContent = '直连模式，无需测试代理'; return; }
                     if (cur === 'custom') {
                         if (!customProxyUrl) { proxyStatus.textContent = '❌ 请先输入自定义代理 URL'; return; }
                         const res = await testSingleProxy('custom', customProxyUrl);
@@ -736,15 +750,10 @@ const PASSWORD_HASH = "9d19d9c19e96248ddc82b0bf356e6fec64109b4c8ab3b0cbcdf2c5535
                 // ========== 增强的查看功能：支持所有文本类文件 ==========
                 function getPreviewType(filename) {
                     const ext = filename.split('.').pop().toLowerCase();
-                    // 图片
                     if (['jpg','jpeg','png','gif','webp','svg','bmp','ico'].includes(ext)) return 'image';
-                    // 视频
                     if (['mp4','webm','ogg','mov'].includes(ext)) return 'video';
-                    // 音频
                     if (['mp3','wav','ogg','flac','m4a'].includes(ext)) return 'audio';
-                    // PDF
                     if (['pdf'].includes(ext)) return 'pdf';
-                    // 其余所有文件（包括 json, html, xml, css, js, txt, md, log, yaml, yml, toml, ini, conf, cfg, sh, bat, ps1, py, java, c, cpp, h, cs, go, rs, php, rb, pl, lua, r, etc.）统一作为文本处理
                     return 'text';
                 }
 
@@ -755,29 +764,23 @@ const PASSWORD_HASH = "9d19d9c19e96248ddc82b0bf356e6fec64109b4c8ab3b0cbcdf2c5535
                     
                     const type = getPreviewType(name);
                     
-                    // 图片预览
                     if (type === 'image') {
                         modalBody.innerHTML = `<img src="${proxyUrl}" style="max-width:100%; height:auto;" onerror="this.parentElement.innerHTML='<p>图片加载失败</p>'">`;
                         return;
                     }
-                    // 视频预览
                     if (type === 'video') {
                         modalBody.innerHTML = `<video controls style="max-width:100%;"><source src="${proxyUrl}">您的浏览器不支持视频播放</video>`;
                         return;
                     }
-                    // 音频预览
                     if (type === 'audio') {
                         modalBody.innerHTML = `<audio controls style="width:100%;"><source src="${proxyUrl}">您的浏览器不支持音频播放</audio>`;
                         return;
                     }
-                    // PDF 预览
                     if (type === 'pdf') {
                         modalBody.innerHTML = `<iframe src="${proxyUrl}" style="width:100%; height:70vh;" frameborder="0"></iframe>`;
                         return;
                     }
                     
-                    // ========== 文本预览（JSON, HTML, TXT, 代码等） ==========
-                    // 准备需要尝试的 URL（原始直链和代理链接）
                     const urlsToTry = [];
                     if (originalUrl && originalUrl.startsWith('http')) urlsToTry.push(originalUrl);
                     if (proxyUrl && proxyUrl !== originalUrl && proxyUrl.startsWith('http')) urlsToTry.push(proxyUrl);
@@ -790,22 +793,13 @@ const PASSWORD_HASH = "9d19d9c19e96248ddc82b0bf356e6fec64109b4c8ab3b0cbcdf2c5535
                     let textContent = null;
                     let lastError = null;
                     
-                    // 依次尝试每个 URL，直到成功获取文本
                     for (const url of urlsToTry) {
                         try {
-                            // 对于原始直链，不携带 Authorization 头以避免 CORS 预检问题（公开仓库 raw 内容无需认证）
-                            // 对于代理链接，同样不携带 Authorization，因为代理可能不转发该头
-                            const fetchOptions = {
-                                method: 'GET',
-                                headers: {
-                                    'Accept': 'text/plain, */*'
-                                }
-                            };
-                            // 注意：不添加 Authorization，确保最大兼容性
+                            const fetchOptions = { method: 'GET', headers: { 'Accept': 'text/plain, */*' } };
                             const response = await fetchWithTimeout(url, fetchOptions);
                             if (response.ok) {
                                 textContent = await response.text();
-                                break; // 成功获取，退出循环
+                                break;
                             } else {
                                 lastError = new Error(`HTTP ${response.status}`);
                             }
@@ -819,7 +813,6 @@ const PASSWORD_HASH = "9d19d9c19e96248ddc82b0bf356e6fec64109b4c8ab3b0cbcdf2c5535
                         return;
                     }
                     
-                    // 检测文件大小，如果过大则截断
                     const MAX_SIZE = 500000;
                     let contentToShow = textContent;
                     let truncated = false;
@@ -828,7 +821,6 @@ const PASSWORD_HASH = "9d19d9c19e96248ddc82b0bf356e6fec64109b4c8ab3b0cbcdf2c5535
                         truncated = true;
                     }
                     
-                    // 代码高亮
                     const ext = name.split('.').pop();
                     let highlighted;
                     try {
