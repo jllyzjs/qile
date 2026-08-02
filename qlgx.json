@@ -22,106 +22,124 @@
       },
       {
         "name": "日后本地包",
-        "url": "http://xw.123234567.xyz:60255/jiduo/vox本地包.zip",
-        "icon": "http://xw.123234567.xyz:60255/jiduo/23.jpg",
+        "url": "http://jiduo666.de5.net:60266/jiduo/vox本地包.zip",
+        "icon": "http://jiduo666.de5.net:60266/jiduo/23.jpg",
         "copy": "",
-        "version": "20260610-3"
+        "version": "最新vox本地包"
       },
       {
         "name": "TVbox助手",
         "url": "https://ghm.078465.xyz/https://raw.githubusercontent.com/jllyzjs/qile/refs/heads/main/tvbox助手230.apk",
         "icon": "https://cdn04132025.gitlink.org.cn/api/v1/repos/zn777/qile/raw/boxzs230.png",
-        "version": "2.3.0"
+        "version": "手机230"
       },
       {
         "name": "当贝桌面",
         "url": "https://raw.atomgit.com/qile71007/ql/blobs/be16edd6cafcdd71f8d22c523c90df08b8b86e8a/dbzm.apk",
         "icon": "https://webpic.dangbei.net/more/img/dbzm.png",
-        "version": "3.3.6"
+        "version": "电视3.3.6"
       },
       {
       "name": "小白文件管理器",
       "url": "https://raw.atomgit.com/qile71007/ql/blobs/790380822d1c6e7c1866bbe4b57878517fb64a06/xbwjglq.apk",
       "icon": "https://img1.runjiapp.com/duoteimg/dtnew_softup_img/202110/20211013165035_85856.jpg",
-      "version": "2.8.0版本"
+      "version": "电视2.8.0"
       },
       {
       "name": "电视应用管家",
       "url": "https://app.qingyingyong.net/down/20230420/dsyygj_2.9.0_dangbei.apk",
       "icon": "https://img.znds.com//uploads/new/151116/9-151116144100254.png",
-      "version": "2.9.0"
+      "version": "电视2.9.0"
       },
       {
         "name": "欢视助手",
         "url": "https://dl-appstore.huan.tv/project/ott/tvhelper/TVhelper_general_1.0.0_20231023174019_release.apk",
         "icon": "https://zhushou.huan.tv/static/img/logo.6b0af0f.png",
-        "version": "1.0"
+        "version": "电视1.0"
+      },
+      {
+        "name": "野草助手",
+        "url": "https://file.yecao.me/common/resource/yc/3/apk/2026/06/24/fun.yecao.helper_2.0.16_1782295478_yecao.apk",
+        "icon": "https://www.yecao.me/wp-content/uploads/sites/2/elementor/thumbs/WechatIMG37782-qic9jsodgshupyei7c367opsz8jvcqqqj7lg5vw8a0.png",
+        "version": "TV通用"
+      },
+      {
+        "name": "野草助手",
+        "url": "https://file.yecao.me/common/resource/yc/3/apk/2026/06/15/net.xmhx2.helper_2.0.15_1781521647_yecao.apk",
+        "icon": "https://www.yecao.me/wp-content/uploads/sites/2/elementor/thumbs/WechatIMG37782-qic9jsodgshupyei7c367opsz8jvcqqqj7lg5vw8a0.png",
+        "version": "海信小米"
       },
       {
         "name": "应用管家",
-        "url": "https://d.kstore.dev/download/2710/yygj.apk",
+        "url": "http://xz.rihou.cc:88/xz.apk?id=yygj.apk",
         "icon": "https://raw.atomgit.com/qile71007/ql/raw/main/yygj.png",
-        "version": "1.8.6"
+        "version": "电视1.8.7"
       },
       {
         "name": "当贝投屏",
         "url": "https://app.qingyingyong.net/down/20260413/dbtp_V2.9.3_dangbei.apk",
         "icon": "https://img.znds.com//images/20260603/CZnz3AE4Aqhld.png",
-        "version": "V2.9.3"
+        "version": "电视2.9.3"
       },
       {
         "name": "小柚投屏",
         "url": "https://extcdn.hsrc.tv/xiaoyou/apk/xiaoyou_general_2.11.1691_release.apk",
         "icon": "http://pic.7273.com/upload/2026-2/2026228192581447.png",
-        "version": "2.26.4"
+        "version": "电视2.26.4"
       },
       {
         "name": "MT管理器",
         "url": "https://file.market.xiaomi.com/download/AppStore/0cdf2c41726af47118298b5eda2d1c1bbfabac44a/MT2.26.4.apk",
         "icon": "https://img03.sogoucdn.com/v2/thumb/resize/w/75/h/75?appid=200614&url=http%3A%2F%2Fpp.myapp.com%2Fma_icon%2F0%2Ficon_54420045_1727160187%2F256",
-        "version": "2.26.4"
+        "version": "手机2.26.4"
       },
       {
         "name": "安卓清理君",
         "url": "https://raw.atomgit.com/qile71007/ql/blobs/a3586ffe16c500d77ddc222d8973464f93e99d9d/azqlj.apk",
         "icon": "https://pp.myapp.com/ma_icon/0/icon_53986928_1760415908/256",
-        "version": "3.8.7"
+        "version": "手机3.8.7"
+      },
+      {
+        "name": "小白一键清理",
+        "url": "http://xz.rihou.cc:88/xz.apk?id=xbql.apk",
+        "icon": "https://ricolj.github.io/tp/xbql.png",
+        "version": "电视TV"
       },
       {
         "name": "海阔视界",
         "url": "https://57d11.198324.com/com.example.hikerview.apk?authKey=3564cd374b1bab1f2a3efe3231c1b5ef8429fad156235de45023e818eed08aeb&expireTime=1779117413",
         "icon": "https://huohua.me/wp-content/uploads/2024/09/1727500435-haikuoshijie.png",
-        "version": "8.82"
+        "version": "手机8.82"
       },
       {
         "name": "免费音乐",
         "url": "https://github.dpik.top/https://github.com/maotoumao/MusicFree/releases/download/v0.6.3-beta.1/app-arm64-v8a-release.apk",
         "icon": "https://p.e5n.com/up/2024-8/2024816155886321.png",
-        "version": "64位0.6.3"
+        "version": "手机0.6.3"
       },
       {
         "name": "飞鸟听书",
         "url": "https://c1018.lanosso.com/08e74031dd88b87e08c34b686327fd25/697c2b82/2025/12/25/01f5a831d9a0aa35fa6e6d6fc1c32b11.apk?fn=feiniao_2.2555_tu.apk",
         "icon": "https://pic.shouji.com.cn/1333wan/imgfile/20240426/26160347ctuf.png",
-        "version": "2.2555"
+        "version": "手机2.2555"
       },
       {
         "name": "阅读",
         "url": "https://github.dpik.top/https://github.com/gedoor/legado/releases/download/beta/legado_app_3.26.04271714_release.apk",
         "icon": "http://pic.7273.com/upload/2022-6/20226131723253860.jpg",
-        "version": "3.26.012111"
+        "version": "手机3.26.012111"
       },
       {
         "name": "文字转音频",
         "url": "https://ghm.078465.xyz/https://raw.githubusercontent.com/jllyzjs/qile/refs/heads/main/文字转语音.apk",
         "icon": "https://cdn04132025.gitlink.org.cn/api/v1/repos/zn777/qile/raw/wzzyp.png",
-        "version": "1.4.0"
+        "version": "手机1.4.0"
       },
       {
         "name": "音量增强",
         "url": "https://raw.atomgit.com/qile71007/ql/blobs/36f2fd8b948fda84b7036d9a356abdca1ce91623/ylzq.apk",
         "icon": "https://cdn04132025.gitlink.org.cn/api/v1/repos/zn777/qile/raw/ylzq.png",
-        "version": "1.0.9"
+        "version": "手机1.0.9"
       },
       {
         "name": "甲壳虫ADB",
@@ -133,7 +151,7 @@
         "name": "梯子V2",
         "url": "https://gh-proxy.com/https://github.com/2dust/v2rayNG/releases/download/2.2.3/v2rayNG_2.2.3_arm64-v8a.apk",
         "icon": "https://cdn04132025.gitlink.org.cn/api/v1/repos/zn777/qile/raw/v2.png",
-        "version": "2.2.3"
+        "version": "手机2.2.3"
       },
       {
         "name": "网页电视",
@@ -157,7 +175,7 @@
         "name": "家庭KTV",
         "url": "https://ghm.078465.xyz/https://raw.githubusercontent.com/IY-CPU/IY/refs/heads/main/%E5%AE%B6%E5%BA%ADKTV115.zip",
         "icon": "http://img.ggzha.com/2023/0601/6478047c0f5a0.png",
-        "version": "115"
+        "version": "电视115"
       }
     ]
   },
@@ -319,6 +337,12 @@
         "version": "电视版32位"
       },
       {
+            "name": "天神IY手机版",
+                "url": "https://ghfast.top/https://github.com/IY-CPU/test/raw/refs/heads/main/%E5%A4%A9%E7%A5%9EIY%E6%89%8B%E6%9C%BA%E7%89%88.apk",
+                "icon": "https://ghfast.top/https://raw.githubusercontent.com/IY-CPU/IY/main/封面/天神IY.png",
+                "version": "5.1.6"
+      },
+      {
       "name":"天神IY电视版",
       "url":"https://ghfile.geekertao.top/https://raw.githubusercontent.com/IY-CPU/test/main/天神IY电视版.zip",
       "icon":"https://gh-proxy.com/https://raw.githubusercontent.com/IY-CPU/IY/main/封面/天神IY.png",
@@ -457,10 +481,10 @@
         "version": "安卓4/32位"
       },
       {
-        "name": "影视AI助手1.2.3",
-        "url": "https://pan.uvqzu.cn/f/najUZ/%E5%BD%B1%E8%A7%86AI%E5%8A%A9%E6%89%8B%E5%86%85%E5%90%AB%E6%95%B0%E6%8D%AE%E5%85%B1%E5%AD%98%E7%89%88v1.2.3.apk",
+        "name": "鱼壳七乐版",
+        "url": "https://pan.uvqzu.cn/f/AQ33Uv/WebHomeTV%E4%B8%83%E4%B9%90183%E7%89%8826072608.apk",
         "icon": "https://cdn04132025.gitlink.org.cn/api/v1/repos/zn777/qile/raw/ok.png",
-        "version": "手机64位"
+        "version": "手机183版"
       }
       
     ]
@@ -550,7 +574,13 @@
                 "name": "影视+",
                 "url": "https://d.kstore.dev/download/2710/ysj/ysj121.apk",
                 "icon": "https://cdn04132025.gitlink.org.cn/api/v1/repos/zn777/qile/raw/ok.png",
-                "version": "1.2.1版"
+                "version": "手机1.2.1"
+            },
+            {
+                "name": "影视+",
+                "url": "https://dogpan.com/f/An6rSE/%E5%BD%B1%E8%A7%86%E5%8A%A0%E7%94%B5%E8%A7%86%E7%AB%AF123.apk",
+                "icon": "https://cdn04132025.gitlink.org.cn/api/v1/repos/zn777/qile/raw/ok.png",
+                "version": "电视1.2.3"
             },
             {
                 "name": "本地包",
