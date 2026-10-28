@@ -57,6 +57,14 @@
             "ext": "./669",
             "jar":"./6610"
         },
+	{
+      "key": "CK百货",
+      "name": "CK百货/G",
+      "type": 1,
+      "api": "https://ckbh1.xyz/api.php/provide/vod/?ac=list",
+      "searchable": 1,
+      "quickSearch": 1
+    },
 		{
       "key": "fwd_huangju",
       "name": "黄果",
